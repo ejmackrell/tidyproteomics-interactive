@@ -19,6 +19,15 @@ source("modules/tab_upload_data.R")
 source("modules/tab_normalize_abundances.R")
 source("modules/tab_expression_analysis.R")
 
+
+imputation_methods <- list(
+  "min" = base::min,
+  "median" = stats::median,
+  "mean" = base::mean,
+  "max" = base::max,
+  "sum" = base::sum
+)
+
 statistical_methods <- list(
   "t-test" = stats::t.test,
   "Wilcoxon test" = stats::wilcox.test,

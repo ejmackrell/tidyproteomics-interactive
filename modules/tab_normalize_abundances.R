@@ -125,7 +125,7 @@ tab_normalize_abundances_server <- function(id, tp) {
           } %>% 
           {
             if (input$checkbox_impute) {
-              impute(., impute_function = stats::median)
+              impute(., impute_function = imputation_methods[[input$select_impute_function]])
             }
           } %>% 
           normalize(
