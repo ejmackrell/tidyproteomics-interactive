@@ -1,0 +1,87 @@
+.brand-link {
+    font-size: 1rem !important;
+}
+
+.brand-link .brand-image {
+    float: left;
+    line-height: .8;
+    margin-right: .5rem;
+    margin-top: -6px !important;
+    max-height: 37px !important;
+    width: auto;
+}
+
+.card {
+  border-radius: 0.125rem !important;
+}
+
+.nav-pills .nav-link {
+    border-radius: .125rem !important;
+}
+
+.main-footer {
+    background-color: #f3f2f1;
+    border-top: 1px solid #dee2e6;
+    color: #323130;
+    padding: 1rem;
+}
+
+.bg-primary {
+    background-color: #5e8cbe!important;
+}
+
+.content-wrapper {
+    background-color: #faf9f8 !important;
+}
+
+.sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active, .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #edebe9 !important;
+    color: #000 !important;
+}
+
+[class*=sidebar-light-] .nav-sidebar>.nav-item>.nav-link.active {
+    color: #323130;
+    box-shadow: none !important;
+}
+
+.img-circle.elevation-3 {
+  box-shadow: none !important;
+}
+
+[class*=sidebar-light-] {
+    background-color: #ffffff;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    padding: 0.5rem 1.25rem !important;
+    position: relative;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+.body {
+  font-size: .9rem !important;
+}
+
+
+label:not(.form-check-label):not(.custom-file-label) {
+    font-weight: 600;
+}
+
+.card-title {
+    float: left;
+    font-size: 1.1rem;
+    font-weight: 400;
+    padding: 2px 0 !important;
+}
+
+.checkbox-primary input[type="checkbox"]:checked+label::before, .checkbox-primary input[type="radio"]:checked+label::before {
+    background-color: #5e8cbe;
+    border-color: #5e8cbe;
+}
+
+.progress-bar {
+    background-color: #5e8cbe;
+}
