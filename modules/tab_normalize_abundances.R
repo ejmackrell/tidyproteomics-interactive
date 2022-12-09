@@ -93,13 +93,15 @@ tab_normalize_abundances_ui <- function(id) {
   
 }
 
-tab_normalize_abundances_server <- function(id, tp) {
+tab_normalize_abundances_server <- function(id, tp, tp_normalized) {
   
   moduleServer(id, function(input, output, session) {
     
     observe({
       
       if (is.null(tp()) | is.null(input$select_normalization_method)) shinyjs::disable("action_normalize") else shinyjs::enable("action_normalize")
+      
+      if (input$checkbox_impute == FALSE) shinyjs::disable("select_impute_function") else shinyjs::enable("select_impute_function")
       
     })
     
@@ -116,17 +118,17 @@ tab_normalize_abundances_server <- function(id, tp) {
       )
       
       # Update tidyproteomics object with normalization
-      tp(
+      tp_normalized(
         tp() %>% 
           {
             if(input$checkbox_drop_contaminants) {
               subset(., description %!like% "^CRAP")
-            }
+            } else .
           } %>% 
           {
             if (input$checkbox_impute) {
               impute(., impute_function = imputation_methods[[input$select_impute_function]])
-            }
+            } else .
           } %>% 
           normalize(
             .method = input$select_normalization_method
@@ -142,10 +144,10 @@ tab_normalize_abundances_server <- function(id, tp) {
       
       isolate({
         
-        shiny::req(tp())
+        shiny::req(tp_normalized())
         shiny::req(input$action_normalize)
         
-        tp() %>% 
+        tp_normalized() %>% 
           plot_normalization() %>% 
           ggplotly() %>% 
           layout(boxmode = "group")
@@ -162,10 +164,10 @@ tab_normalize_abundances_server <- function(id, tp) {
       input$action_normalize
       
       isolate({
-        shiny::req(tp())
+        shiny::req(tp_normalized())
         shiny::req(input$action_normalize)
         
-        tp() %>% 
+        tp_normalized() %>% 
           plot_variation_cv() %>% 
           ggplotly()
         
@@ -180,10 +182,10 @@ tab_normalize_abundances_server <- function(id, tp) {
       
       isolate({
         
-        shiny::req(tp())
+        shiny::req(tp_normalized())
         shiny::req(input$action_normalize)
         
-        tp() %>% 
+        tp_normalized() %>% 
           plot_dynamic_range()
         
       })
@@ -197,10 +199,10 @@ tab_normalize_abundances_server <- function(id, tp) {
       
       isolate({
         
-        shiny::req(tp())
+        shiny::req(tp_normalized())
         shiny::req(input$action_normalize)
         
-        tp() %>% 
+        tp_normalized() %>% 
           plot_pca() %>% 
           ggplotly()
         
@@ -214,10 +216,10 @@ tab_normalize_abundances_server <- function(id, tp) {
       
       isolate({
         
-        shiny::req(tp())
+        shiny::req(tp_normalized())
         shiny::req(input$action_normalize)
         
-        tp() %>% 
+        tp_normalized() %>% 
           plot_variation_pca() %>% 
           ggplotly()
         
@@ -231,10 +233,10 @@ tab_normalize_abundances_server <- function(id, tp) {
       
       isolate({
         
-        shiny::req(tp())
+        shiny::req(tp_normalized())
         shiny::req(input$action_normalize)
         
-        tp() %>% 
+        tp_normalized() %>% 
           plot_heatmap()
         
       })

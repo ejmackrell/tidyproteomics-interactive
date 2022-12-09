@@ -13,6 +13,12 @@ tab_expression_analysis_ui <- function(id) {
       
       box(
         title = "Differential expression parameters",
+        shinyjs::disabled(
+          awesomeCheckbox(ns("checkbox_use_normalized_values"),
+            label = "Use normalized abundances?",
+            value = FALSE
+          )
+        ),
         selectInput(ns("select_group_one"),
           label = "Choose a sample group (ratio numerator)",
           choices = NULL
@@ -38,9 +44,10 @@ tab_expression_analysis_ui <- function(id) {
       box(
         title = "Volcano plot",
         id = ns("box_volcano_plot"),
-        width = 10,
+        width = 12,
+        height = 650,
         collapsed = TRUE,
-        plotlyOutput(ns("plot_volcano_plot")) %>% withSpinner(type = 8)
+        plotlyOutput(ns("plot_volcano_plot"), height = 600) %>% withSpinner(type = 8)
       ),
       
       box(
@@ -57,7 +64,7 @@ tab_expression_analysis_ui <- function(id) {
 }
 
 
-tab_expression_analysis_server <- function(id, tp) {
+tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression) {
   
   moduleServer(id, function(input, output, session) {
     
@@ -80,22 +87,75 @@ tab_expression_analysis_server <- function(id, tp) {
     
     
     observeEvent(experiments(), {
+      
+      if (length(experiments()) > 1) {
+        
+        map(
+          .x = c(
+            "select_group_one",
+            "select_group_two"
+          ),
+          .f = ~ shinyjs::enable(.x)
+        )
 
-      updateSelectInput(session, "select_group_one",
-        label = "Choose a sample group (ratio numerator)",
-        choices = tp() %>%
-          pluck("experiments") %>%
-          pull(sample) %>%
-          unique()
-      )
-
-      updateSelectInput(session, "select_group_two",
-        label = "Choose a sample group (ratio denominator)",
-        choices = tp() %>%
-          pluck("experiments") %>%
-          pull(sample) %>%
-          unique()
-      )
+        updateSelectInput(session, "select_group_one",
+          label = "Choose a sample group (ratio numerator)",
+          choices = experiments(),
+          selected = experiments()[1]
+        )
+  
+        updateSelectInput(session, "select_group_two",
+          label = "Choose a sample group (ratio denominator)",
+          choices = experiments(),
+          selected = experiments()[2]
+        )
+        
+      } else {
+        
+        map(
+          .x = c(
+            "select_group_one",
+            "select_group_two"
+          ),
+          .f = ~ shinyjs::disable(.x)
+        )
+        
+        updateSelectInput(session, "select_group_one",
+          label = "Differential expression analysis requires > 1 sample group",
+          choices = NULL
+        )
+        
+        updateSelectInput(session, "select_group_two",
+          label = "Differential expression analysis requires > 1 sample group",
+          choices = NULL
+        )
+         
+      }
+      
+    })
+    
+    
+    observe({
+      
+      if (is.null(tp_normalized()) & length(experiments()) > 1) {
+      
+        updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
+          label = "Use normalized abundances?",
+          value = FALSE
+        )
+        
+        shinyjs::disable("checkbox_use_normalized_values")
+        
+      } else {
+        
+        updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
+          label = "Use normalized abundances?",
+          value = TRUE
+        )
+        
+        shinyjs::enable("checkbox_use_normalized_values")
+        
+      }
       
     })
     
@@ -109,13 +169,26 @@ tab_expression_analysis_server <- function(id, tp) {
         ),
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
+      
+      if (input$checkbox_use_normalized_values) {
         
-      tp(
-        tp() %>% 
-          tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
-            .method = statistical_methods[[input$select_statistical_method]]
-          )
-      )
+        tp_expression(
+          tp_normalized() %>% 
+            tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
+              .method = statistical_methods[[input$select_statistical_method]]
+            )
+        )
+      
+      } else {
+        
+        tp_expression(
+          tp() %>% 
+            tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
+              .method = statistical_methods[[input$select_statistical_method]]
+            )
+        )
+        
+      }
       
     })
     
@@ -125,7 +198,10 @@ tab_expression_analysis_server <- function(id, tp) {
       input$action_expression_analysis
       
       isolate({
-        tp()$analysis[[glue("{input$select_group_one}/{input$select_group_two}")]]$expression %>% 
+        
+        shiny::req(tp_expression()$analysis)
+        
+        tp_expression()$analysis[[glue("{input$select_group_one}/{input$select_group_two}")]]$expression %>% 
           plotly::plot_ly(
             type = "scattergl",
             x = ~ log2_foldchange,
@@ -158,9 +234,9 @@ tab_expression_analysis_server <- function(id, tp) {
       
       isolate({
         
-        shiny::req(tp()$analysis)
+        shiny::req(tp_expression()$analysis)
       
-        tp()$analysis[[glue("{input$select_group_one}/{input$select_group_two}")]]$expression %>% 
+        tp_expression()$analysis[[glue("{input$select_group_one}/{input$select_group_two}")]]$expression %>% 
           reactable(
             sortable = TRUE,
             highlight = TRUE,
