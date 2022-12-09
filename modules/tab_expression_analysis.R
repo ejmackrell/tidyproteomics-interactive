@@ -137,23 +137,23 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
     
     observe({
       
-      if (is.null(tp_normalized()) & length(experiments()) > 1) {
+      if (!is.null(tp_normalized()) & length(experiments()) > 1) {
       
-        updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-          label = "Use normalized abundances?",
-          value = FALSE
-        )
-        
-        shinyjs::disable("checkbox_use_normalized_values")
-        
-      } else {
-        
         updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
           label = "Use normalized abundances?",
           value = TRUE
         )
         
         shinyjs::enable("checkbox_use_normalized_values")
+        
+      } else {
+        
+        updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
+          label = "Use normalized abundances?",
+          value = FALSE
+        )
+        
+        shinyjs::disable("checkbox_use_normalized_values")
         
       }
       
