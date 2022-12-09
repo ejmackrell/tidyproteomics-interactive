@@ -19,7 +19,7 @@ source("modules/tab_upload_data.R")
 source("modules/tab_normalize_abundances.R")
 source("modules/tab_expression_analysis.R")
 
-statistical_methods = list(
+statistical_methods <- list(
   "t-test" = stats::t.test,
   "Wilcoxon test" = stats::wilcox.test,
   "Kolmogorov-Smirnov test" = stats::ks.test,
