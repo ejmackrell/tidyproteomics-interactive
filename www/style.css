@@ -85,3 +85,8 @@ label:not(.form-check-label):not(.custom-file-label) {
 .progress-bar {
     background-color: #5e8cbe;
 }
+
+.row {
+    margin-right: 0px !important;
+    margin-left: 0px !important;
+}

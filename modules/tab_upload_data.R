@@ -11,37 +11,45 @@ tab_upload_data_ui <- function(id) {
     body = tabItem(
       tabName = "tab_upload_data",
       
-      box(
-        title = "Table upload",
-        selectInput(ns("select_data_type"),
-          label = "Select a data type",
-          choices = list(
-            "Proteome Discoverer" = "ProteomeDiscoverer",
-            "MaxQuant" = "MaxQuant"
+      fluidRow(
+        box(
+          title = "Table upload",
+          selectInput(ns("select_data_type"),
+            label = "Select a data type",
+            choices = list(
+              "Proteome Discoverer" = "ProteomeDiscoverer",
+              "MaxQuant" = "MaxQuant"
+            ),
+            selected = "mq",
+            width = "300px"
           ),
-          selected = "mq",
-          width = "300px"
-        ),
-        selectInput(ns("select_analyte_type"),
-          label = "Select an analyte type",
-          choices = list(
-            "Proteins" = "proteins",
-            "Peptides" = "peptides"
+          selectInput(ns("select_analyte_type"),
+            label = "Select an analyte type",
+            choices = list(
+              "Proteins" = "proteins",
+              "Peptides" = "peptides"
+            ),
+            selected = "proteins",
+            width = "300px"
           ),
-          selected = "proteins",
-          width = "300px"
+          br(),
+          
+          # Expand to allow .csv?
+          fileInput(ns("upload_table"),
+            label = "Upload a search file (.xlsx)",
+            accept = c(".xlsx")
+          ),
+          
+          br(),
+          actionButton(ns("action_upload_table"),
+            label = "Import data"
+          )
         ),
-        br(),
-        
-        # Expand to allow .csv?
-        fileInput(ns("upload_table"),
-          label = "Upload a search file (.xlsx)",
-          accept = c(".xlsx")
-        ),
-        
-        br(),
-        actionButton(ns("action_upload_table"),
-          label = "Import data"
+        box(
+          title = "tidyproteomics object summary",
+          collapsed = TRUE,
+          id = ns("box_tidyproteomics_object_summary"),
+          htmlOutput(ns("text_tidyproteomics_summary")) %>% withSpinner(type = 8, proxy.height = "250px")
         )
       ),
       
@@ -83,7 +91,8 @@ tab_upload_data_server <- function(id, tp) {
       map(
         .x = c(
           "box_summary_statistics",
-          "box_contamination_statistics"
+          "box_contamination_statistics",
+          "box_tidyproteomics_object_summary"
         ),
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
@@ -97,6 +106,16 @@ tab_upload_data_server <- function(id, tp) {
       
       # Add some validate/need statements for mismatched data
       tp(imported_tp)
+      
+    })
+    
+    output$text_tidyproteomics_summary <- renderUI({
+      
+      input$action_upload_table
+      
+      isolate({
+        HTML(paste0("<pre style='padding: 0rem; margin-bottom: 0rem; overflow: hidden;'>",capture.output(tp()), "</pre>"))
+      })
       
     })
     

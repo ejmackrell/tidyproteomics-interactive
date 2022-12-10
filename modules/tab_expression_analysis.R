@@ -20,11 +20,11 @@ tab_expression_analysis_ui <- function(id) {
           )
         ),
         selectInput(ns("select_group_one"),
-          label = "Choose a sample group (ratio numerator)",
+          label = "Select a sample group (ratio numerator)",
           choices = NULL
         ),
         selectInput(ns("select_group_two"),
-          label = "Choose a sample group (ratio denominator)",
+          label = "Select a sample group (ratio denominator)",
           choices = NULL
         ),
         selectInput(ns("select_statistical_method"),
@@ -99,13 +99,13 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
         )
 
         updateSelectInput(session, "select_group_one",
-          label = "Choose a sample group (ratio numerator)",
+          label = "Select a sample group (ratio numerator)",
           choices = experiments(),
           selected = experiments()[1]
         )
   
         updateSelectInput(session, "select_group_two",
-          label = "Choose a sample group (ratio denominator)",
+          label = "Select a sample group (ratio denominator)",
           choices = experiments(),
           selected = experiments()[2]
         )
@@ -235,8 +235,16 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
       isolate({
         
         shiny::req(tp_expression()$analysis)
-      
-        tp_expression()$analysis[[glue("{input$select_group_one}/{input$select_group_two}")]]$expression %>% 
+        
+        tp_expression()$annotation %>% 
+          filter(term %in% c("gene_name", "description")) %>% 
+          arrange(desc(term)) %>% 
+          tidyr::pivot_wider(id_cols = "protein", names_from = "term", values_from = "annotation") %>% 
+          right_join(
+            y = tp_expression() %>% 
+              pluck("analysis", glue("{input$select_group_one}/{input$select_group_two}"), "expression"),
+            by = "protein"
+          ) %>% 
           reactable(
             sortable = TRUE,
             highlight = TRUE,
@@ -244,7 +252,7 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
             filterable = TRUE,
             searchable = TRUE,
             defaultColDef = colDef(
-              cell = render_fixed_reactable
+              cell = render_expression_reactable
             ),
             columns = list(
               protein = colDef(
@@ -253,6 +261,14 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
                   }"
                 ),
                 html = TRUE
+              ),
+              description = colDef(
+                minWidth = 300,
+                cell = function(value) {
+                  
+                  stringr::str_match(value, pattern = stringr::regex("^(.*) OS"))[2]
+                  
+                }
               )
             )
           )

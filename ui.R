@@ -26,7 +26,8 @@ ui <- dashboardPage(
     sidebarMenu(
       tab_upload_data_ui("tab_upload_data")[["sidebar"]],
       tab_normalize_abundances_ui("tab_normalize_abundances")[["sidebar"]],
-      tab_expression_analysis_ui("tab_expression_analysis")[["sidebar"]]
+      tab_expression_analysis_ui("tab_expression_analysis")[["sidebar"]],
+      tab_enrichment_analysis_ui("tab_enrichment_analysis")[["sidebar"]]
     )
   ),
   body = dashboardBody(
@@ -42,7 +43,8 @@ ui <- dashboardPage(
     tabItems(
       tab_upload_data_ui("tab_upload_data")[["body"]],
       tab_normalize_abundances_ui("tab_normalize_abundances")[["body"]],
-      tab_expression_analysis_ui("tab_expression_analysis")[["body"]]
+      tab_expression_analysis_ui("tab_expression_analysis")[["body"]],
+      tab_enrichment_analysis_ui("tab_enrichment_analysis")[["body"]]
     )
   ),
   footer = dashboardFooter(
