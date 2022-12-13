@@ -4,7 +4,7 @@ tab_normalize_abundances_ui <- function(id) {
   ns <- NS(id)
   
   tagList(
-    sidebar = menuItem("Normalize abundances",
+    sidebar = menuItem("Abundance normalization",
       tabName = "tab_normalize_abundances",
       icon = icon("scale-balanced")
     ),
@@ -26,9 +26,17 @@ tab_normalize_abundances_ui <- function(id) {
           choices = c(
             "min",
             "median",
-            "mean",
-            "max",
-            "sum"
+            "randomforest"
+            # "mean",
+            # "max",
+            # "sum"
+          )
+        ),
+        selectInput(ns("select_impute_method"),
+          label = "Select a method for imputation",
+          choices = c(
+            "within",
+            "between"
           )
         ),
         selectInput(ns("select_normalization_method"),
@@ -101,7 +109,28 @@ tab_normalize_abundances_server <- function(id, tp, tp_normalized) {
       
       if (is.null(tp()) | is.null(input$select_normalization_method)) shinyjs::disable("action_normalize") else shinyjs::enable("action_normalize")
       
-      if (input$checkbox_impute == FALSE) shinyjs::disable("select_impute_function") else shinyjs::enable("select_impute_function")
+      if (input$checkbox_impute == FALSE) {
+        
+        shinyjs::disable("select_impute_function") 
+        shinyjs::disable("select_impute_method")
+        
+      } else {
+        
+        shinyjs::enable("select_impute_function")
+        shinyjs::enable("select_impute_method")
+        
+      }
+      
+      
+      if (input$select_impute_function == "randomforest") {
+        
+        shinyjs::hide("select_impute_method")
+        
+      } else {
+        
+        shinyjs::show("select_impute_method")
+        
+      }
       
     })
     
@@ -117,6 +146,8 @@ tab_normalize_abundances_server <- function(id, tp, tp_normalized) {
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
+      # browser()
+      
       # Update tidyproteomics object with normalization
       tp_normalized(
         tp() %>% 
@@ -127,7 +158,10 @@ tab_normalize_abundances_server <- function(id, tp, tp_normalized) {
           } %>% 
           {
             if (input$checkbox_impute) {
-              impute(., impute_function = imputation_methods[[input$select_impute_function]])
+              impute(., 
+                impute_function = imputation_methods[[input$select_impute_function]],
+                method = if (input$select_impute_function == "randomforest") "between" else input$select_impute_method
+              )
             } else .
           } %>% 
           normalize(

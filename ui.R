@@ -25,6 +25,7 @@ ui <- dashboardPage(
     elevation = 0,
     sidebarMenu(
       tab_upload_data_ui("tab_upload_data")[["sidebar"]],
+      # tab_subset_ui("tab_subset")[["sidebar"]],
       tab_normalize_abundances_ui("tab_normalize_abundances")[["sidebar"]],
       tab_expression_analysis_ui("tab_expression_analysis")[["sidebar"]],
       tab_enrichment_analysis_ui("tab_enrichment_analysis")[["sidebar"]]
@@ -42,6 +43,7 @@ ui <- dashboardPage(
     tags$head(includeCSS("www/style.css")),
     tabItems(
       tab_upload_data_ui("tab_upload_data")[["body"]],
+      # tab_subset_ui("tab_subset")[["body"]],
       tab_normalize_abundances_ui("tab_normalize_abundances")[["body"]],
       tab_expression_analysis_ui("tab_expression_analysis")[["body"]],
       tab_enrichment_analysis_ui("tab_enrichment_analysis")[["body"]]

@@ -16,6 +16,7 @@ library(glue)
 library(tidyproteomics)
 
 source("modules/tab_upload_data.R")
+source("modules/tab_subset.R")
 source("modules/tab_normalize_abundances.R")
 source("modules/tab_expression_analysis.R")
 source("modules/tab_enrichment_analysis.R")
@@ -24,9 +25,10 @@ source("modules/tab_enrichment_analysis.R")
 imputation_methods <- list(
   "min" = base::min,
   "median" = stats::median,
-  "mean" = base::mean,
-  "max" = base::max,
-  "sum" = base::sum
+  "randomforest" = "randomforest"
+  # "mean" = base::mean,
+  # "max" = base::max,
+  # "sum" = base::sum
 )
 
 statistical_methods <- list(
@@ -95,4 +97,25 @@ render_enrichment_reactable <- JS("function(cellInfo, state) {
     }
   
   }"
+)
+
+subsetting_operators <- list(
+  "character" = list(
+    "%like%",
+    "!%like%",
+    "==",
+    "!="
+  ),
+  "logical" = list(
+    "==",
+    "!="
+  ),
+  numeric = list(
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "==",
+    "!="
+  )
 )

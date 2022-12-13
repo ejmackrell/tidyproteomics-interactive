@@ -193,6 +193,35 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
     })
     
     
+    tp_expression_analysis_annotated <- eventReactive(input$action_expression_analysis, {
+      
+      annotation_columns <- tp_expression()$annotation %>% 
+        filter(term %in% c("gene_name", "description")) %>% 
+        distinct(term) %>% 
+        pull() %>% 
+        sort(decreasing = TRUE)
+      
+      map(
+        .x = tp_expression()$analysis, 
+        .f = ~ .x$expression %>% 
+          left_join(
+            y = tp_expression()$annotation %>% 
+              filter(term %in% c("gene_name", "description")) %>%
+              tidyr::pivot_wider(id_cols = "protein", names_from = "term", values_from = "annotation")
+          ) %>% 
+          relocate(contains(annotation_columns), .after = "protein") %>% 
+          {
+            if ("description" %in% colnames(.)) {
+              mutate(., description = {description %>% stringr::str_match(pattern = stringr::regex('^(.*) OS'))}[,2])
+            } else .
+          }
+      )
+      
+      
+      
+    })
+    
+    
     output$plot_volcano_plot <- renderPlotly({
       
       input$action_expression_analysis
@@ -201,7 +230,8 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
         
         shiny::req(tp_expression()$analysis)
         
-        tp_expression()$analysis[[glue("{input$select_group_one}/{input$select_group_two}")]]$expression %>% 
+        tp_expression_analysis_annotated() %>% 
+          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>% 
           plotly::plot_ly(
             type = "scattergl",
             x = ~ log2_foldchange,
@@ -212,17 +242,19 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
             alpha = 0.5,
             hoverinfo = 'text',
             text = glue::glue("accession: {.$protein}
+            {if ('gene_name' %in% colnames(.)) invisible(glue('gene name: {.$gene_name}'))}
+            {if ('description' %in% colnames(.)) invisible(glue('description: {.$description}'))}
             log10 average expression: {formatC(.$average_expression, format = 'e', digits = 2)}
             log2FC: {round(.$log2_foldchange, digits = 3)}
             adjusted p-value: {formatC(.$adj_p_value, format = 'e', digits = 2)}
             imputed: {round(.$imputed, digits = 3)}")
           ) %>% 
-            plotly::layout(
-              title = list(
-                text = glue::glue("{input$select_group_one} vs. {input$select_group_two}")
-              ),
-              margin = list(b = 80, l = 80, r = 80, t = 80)
-            )
+          plotly::layout(
+            title = list(
+              text = glue::glue("{input$select_group_one} vs. {input$select_group_two}")
+            ),
+            margin = list(b = 80, l = 80, r = 80, t = 80)
+          )
       })
       
     })
@@ -236,15 +268,9 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
         
         shiny::req(tp_expression()$analysis)
         
-        tp_expression()$annotation %>% 
-          filter(term %in% c("gene_name", "description")) %>% 
-          arrange(desc(term)) %>% 
-          tidyr::pivot_wider(id_cols = "protein", names_from = "term", values_from = "annotation") %>% 
-          right_join(
-            y = tp_expression() %>% 
-              pluck("analysis", glue("{input$select_group_one}/{input$select_group_two}"), "expression"),
-            by = "protein"
-          ) %>% 
+        tp_expression_analysis_annotated() %>% 
+          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
+          arrange(adj_p_value) %>% 
           reactable(
             sortable = TRUE,
             highlight = TRUE,
@@ -263,12 +289,7 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
                 html = TRUE
               ),
               description = colDef(
-                minWidth = 300,
-                cell = function(value) {
-                  
-                  stringr::str_match(value, pattern = stringr::regex("^(.*) OS"))[2]
-                  
-                }
+                minWidth = 300
               )
             )
           )
