@@ -14,20 +14,20 @@ tab_upload_data_ui <- function(id) {
       fluidRow(
         box(
           title = "Table upload",
+          # status = "secondary",
           selectInput(ns("select_data_type"),
             label = "Select a data type",
             choices = list(
-              "Proteome Discoverer" = "ProteomeDiscoverer",
-              "MaxQuant" = "MaxQuant"
+              "Proteome Discoverer" = "ProteomeDiscoverer"#,
+              # "MaxQuant" = "MaxQuant"
             ),
-            selected = "mq",
             width = "300px"
           ),
           selectInput(ns("select_analyte_type"),
             label = "Select an analyte type",
             choices = list(
-              "Proteins" = "proteins",
-              "Peptides" = "peptides"
+              "Proteins" = "proteins"#,
+              # "Peptides" = "peptides"
             ),
             selected = "proteins",
             width = "300px"
@@ -49,6 +49,7 @@ tab_upload_data_ui <- function(id) {
       
       box(
         title = "tidyproteomics object summary",
+        status = "info",
         collapsed = TRUE,
         width = 10,
         id = ns("box_tidyproteomics_object_summary"),
@@ -56,7 +57,31 @@ tab_upload_data_ui <- function(id) {
       ),
       
       box(
+        title = "Data feature selection",
+        # status = "secondary",
+        collapsed = TRUE,
+        id = ns("box_data_feature_selection"),
+        selectInput(ns("select_data_feature"),
+          label = "Please upload a data table to use this feature",
+          choices = NULL
+        ),
+        actionButton(ns("action_view_feature"),
+          label = "View feature"
+        )
+      ),
+      
+      box(
+        title = "Data feature viewer",
+        status = "info",
+        collapsed = TRUE,
+        width = 12,
+        id = ns("box_data_feature_viewer"),
+        reactableOutput(ns("table_data_feature")) %>% withSpinner(type = 8)
+      ),
+      
+      box(
         title = "Summary table selection",
+        # status = "secondary",
         collapsed = TRUE,
         id = ns("box_summary_table_selection"),
         selectInput(ns("select_summary_table"),
@@ -70,6 +95,7 @@ tab_upload_data_ui <- function(id) {
         
       box(
         title = "Summary statistics",
+        status = "info",
         id = ns("box_summary_statistics"),
         collapsed = TRUE,
         width = 12,
@@ -78,6 +104,7 @@ tab_upload_data_ui <- function(id) {
       
       box(
         title = "Contaminant selection",
+        # status = "secondary",
         id = ns("box_contaminant_selection"),
         collapsed = TRUE,
         textInput(ns("text_contaminant_pattern"),
@@ -91,6 +118,7 @@ tab_upload_data_ui <- function(id) {
       
       box(
         title = "Contamination statistics",
+        status = "info",
         id = ns("box_contamination_statistics"),
         collapsed = TRUE,
         width = 12,
@@ -102,10 +130,9 @@ tab_upload_data_ui <- function(id) {
 }
 
 
-tab_upload_data_server <- function(id, tp) {
+tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized) {
   
   moduleServer(id, function(input, output, session) {
-    
     
     observe({
       
@@ -114,27 +141,58 @@ tab_upload_data_server <- function(id, tp) {
     })
     
     
+    
     observeEvent(input$action_upload_table, {
       
       map(
         .x = c(
-          "box_tidyproteomics_object_summary",
-          "box_summary_table_selection",
-          "box_contaminant_selection"
+          "box_tidyproteomics_object_summary"
         ),
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
-      # Import data as tidyproteomics object
-      imported_tp <- tidyproteomics::import(
-        files = input$upload_table$datapath,
-        platform = input$select_data_type,
-        analyte = input$select_analyte_type
+    })
+    
+    
+    set_tp <- eventReactive(input$action_upload_table, {
+      
+      tp(
+        tidyproteomics::import(
+          files = input$upload_table$datapath,
+          platform = input$select_data_type,
+          analyte = input$select_analyte_type
+        )
       )
       
-      # Add some validate/need statements for mismatched data
-      tp(imported_tp)
+      # Reset subsetted and normalized objects upon upload of new data
+      tp_subset(NULL)
+      tp_normalized(NULL)
       
+      tp()
+      
+    })
+    
+    
+    output$text_tidyproteomics_summary <- renderUI({
+      
+      shiny::req(set_tp())
+
+      isolate({
+        
+        map(
+          .x = c(
+            # "box_tidyproteomics_object_summary"
+            "box_summary_table_selection",
+            "box_contaminant_selection",
+            "box_data_feature_selection"
+          ),
+          .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
+        )
+        
+        HTML(paste0("<pre style='padding: 0rem; margin-bottom: 0rem; overflow: hidden;'>", capture.output(tp()), "</pre>"))
+        
+      })
+
     })
     
     
@@ -162,15 +220,19 @@ tab_upload_data_server <- function(id, tp) {
     })
     
     
-    output$text_tidyproteomics_summary <- renderUI({
+    observeEvent(input$action_view_feature, {
       
-      input$action_upload_table
-      
-      isolate({
-        HTML(paste0("<pre style='padding: 0rem; margin-bottom: 0rem; overflow: hidden;'>", capture.output(tp()), "</pre>"))
-      })
+      map(
+        .x = c(
+          "box_data_feature_viewer"
+        ),
+        .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
+      )
       
     })
+    
+    
+    
     
     
     observeEvent(tp(), {
@@ -180,40 +242,51 @@ tab_upload_data_server <- function(id, tp) {
         choices = tidyproteomics:::get_variables(tp())
       )
       
+      updateSelectInput(session, "select_data_feature",
+        label = "Select a data feature",
+        choices = tabular_data_features[tabular_data_features %in% names(tp())]
+      )
+      
     })
     
     
-    # tp_summary <- eventReactive(input$action_upload_table, {
-    #   
-    #   shiny::req(tp())
-    #   
-    #   tidyproteomics:::get_variables(tp()) %>% 
-    #     setNames(.,.) %>% 
-    #     map(
-    #       .x = .,
-    #       .f = ~ summary(tp(), .x, destination = "return")
-    #     )
-    #   
-    # })
+    output$table_data_feature <- reactable::renderReactable({
+      
+      input$action_view_feature
+      
+      isolate({
+        
+        shiny::req(tp())
+        
+        tp() %>% 
+          pluck(input$select_data_feature) %>% 
+          reactable(
+            sortable = TRUE,
+            filterable = TRUE,
+            searchable = TRUE,
+            highlight = TRUE,
+            resizable = TRUE,
+            defaultColDef = colDef(
+              sortNALast = TRUE
+            )
+          )
+        
+      })
+      
+    })
     
     
     output$table_summary_sample <- reactable::renderReactable({
       
       input$action_summarize
       
-      # browser()
-      
       isolate({
       
-        # shiny::req(tp_summary())
         shiny::req(tp())
         
-      # tp_summary() %>%
-      #   pluck(input$select_summary_table) %>%
         tp() %>% 
           summary(input$select_summary_table, destination = "return") %>% 
           reactable(
-            elementId = "test_reactable",
             sortable = TRUE,
             filterable = TRUE,
             searchable = TRUE,

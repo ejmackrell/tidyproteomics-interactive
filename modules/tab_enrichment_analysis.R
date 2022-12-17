@@ -6,7 +6,8 @@ tab_enrichment_analysis_ui <- function(id) {
   tagList(
     sidebar = menuItem("Enrichment analysis",
       tabName = "tab_enrichment_analysis",
-      icon = icon("project-diagram")
+      icon = icon("project-diagram"),
+      condition = "output['tab_enrichment_analysis-tab_subset_availability'] == true"
     ),
     body = tabItem(
       tabName = "tab_enrichment_analysis",
@@ -21,6 +22,11 @@ tab_enrichment_analysis_ui <- function(id) {
           label = "Select ontology for annotation enrichment",
           choices = NULL
         ),
+        selectInput(ns("select_method"),
+          label = "Select an enrichment method",
+          choices = c("gsea", "wilcoxon")
+        ),
+        br(),
         actionButton(ns("action_enrichment"),
           label = "Run enrichment"
         )
@@ -28,6 +34,7 @@ tab_enrichment_analysis_ui <- function(id) {
       
       box(
         title = "Annotation enrichment plot",
+        status = "info",
         id = ns("box_annotation_enrichment_plot"),
         width = 10,
         collapsed = TRUE,
@@ -36,6 +43,7 @@ tab_enrichment_analysis_ui <- function(id) {
       
       box(
         title = "Annotation enrichment table",
+        status = "info",
         id = ns("box_annotation_enrichment_table"),
         width = 12,
         collapsed = TRUE,
@@ -50,6 +58,16 @@ tab_enrichment_analysis_ui <- function(id) {
 tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment) {
   
   moduleServer(id, function(input, output, session) {
+    
+    
+    output$tab_subset_availability <- reactive({  
+      
+      if (is.null(tp_expression())) FALSE else TRUE
+      
+    })
+    
+    outputOptions(output, "tab_subset_availability", suspendWhenHidden = FALSE)
+    
     
     observe({
       
@@ -130,9 +148,14 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
+      # browser()
+      
       tp_enrichment(
         tp_expression() %>% 
-          enrichment(!!input$select_contrast, .term = input$select_ontology)
+          enrichment(!!input$select_contrast, 
+            .term = input$select_ontology,
+            .method = input$select_method
+          )
       )
       
     })

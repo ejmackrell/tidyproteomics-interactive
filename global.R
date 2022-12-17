@@ -5,12 +5,14 @@ library(fresh)
 library(shinycssloaders)
 library(shinyWidgets)
 library(shinyjs)
+library(tippy)
 
 library(dplyr)
 library(magrittr)
 library(reactable)
 library(plotly)
 library(purrr)
+library(rlang)
 library(glue)
 
 library(tidyproteomics)
@@ -20,7 +22,12 @@ source("modules/tab_subset.R")
 source("modules/tab_normalize_abundances.R")
 source("modules/tab_expression_analysis.R")
 source("modules/tab_enrichment_analysis.R")
+source("modules/tab_introduction.R")
 
+options(
+  spinner.size = 0.75,
+  spinner.color = "#5e8cbe7a"
+)
 
 imputation_methods <- list(
   "min" = base::min,
@@ -102,7 +109,7 @@ render_enrichment_reactable <- JS("function(cellInfo, state) {
 subsetting_operators <- list(
   "character" = list(
     "%like%",
-    "!%like%",
+    # "%!like%",
     "==",
     "!="
   ),
@@ -110,7 +117,7 @@ subsetting_operators <- list(
     "==",
     "!="
   ),
-  numeric = list(
+  "numeric" = list(
     "<",
     ">",
     "<=",
@@ -118,4 +125,11 @@ subsetting_operators <- list(
     "==",
     "!="
   )
+)
+
+tabular_data_features <- c(
+  "experiments",
+  "quantitative",
+  "accounting",
+  "annotations"
 )

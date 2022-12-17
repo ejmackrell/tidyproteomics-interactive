@@ -6,7 +6,8 @@ tab_expression_analysis_ui <- function(id) {
   tagList(
     sidebar = menuItem("Expression analysis",
       tabName = "tab_expression_analysis",
-      icon = icon("volcano")
+      icon = icon("volcano"),
+      condition = "output['tab_expression_analysis-tab_subset_availability'] == true"
     ),
     body = tabItem(
       tabName = "tab_expression_analysis",
@@ -15,7 +16,7 @@ tab_expression_analysis_ui <- function(id) {
         title = "Differential expression parameters",
         shinyjs::disabled(
           awesomeCheckbox(ns("checkbox_use_normalized_values"),
-            label = "Use normalized abundances?",
+            label = "Use preprocessed abundances?",
             value = FALSE
           )
         ),
@@ -43,6 +44,7 @@ tab_expression_analysis_ui <- function(id) {
       
       box(
         title = "Volcano plot",
+        status = "info",
         id = ns("box_volcano_plot"),
         width = 12,
         height = 650,
@@ -52,6 +54,7 @@ tab_expression_analysis_ui <- function(id) {
       
       box(
         title = "Differential expression table",
+        status = "info",
         id = ns("box_table_differential_expression"),
         width = 12,
         collapsed = TRUE,
@@ -67,6 +70,15 @@ tab_expression_analysis_ui <- function(id) {
 tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression) {
   
   moduleServer(id, function(input, output, session) {
+    
+    
+    output$tab_subset_availability <- reactive({  
+      
+      if (is.null(tp())) FALSE else TRUE
+      
+    })
+    
+    outputOptions(output, "tab_subset_availability", suspendWhenHidden = FALSE)
     
     
     observe({
@@ -140,7 +152,7 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
       if (!is.null(tp_normalized()) & length(experiments()) > 1) {
       
         updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-          label = "Use normalized abundances?",
+          label = "Use preprocessed abundances?",
           value = TRUE
         )
         
@@ -149,7 +161,7 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
       } else {
         
         updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-          label = "Use normalized abundances?",
+          label = "Use preprocessed abundances?",
           value = FALSE
         )
         
