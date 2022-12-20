@@ -117,13 +117,28 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     
     observeEvent(tp(), {
       
-      updateSelectInput(session, "select_ontology",
-        label = "Select an ontology for annotation enrichment",
-        choices =  tp()$annotations %>% 
-          distinct(term) %>% 
-          pull() %>% 
-          purrr::discard(~ .x %in% c("description", "gene_id_entrez", "gene_id_ensemble", "gene_name"))
-      )
+      if (!is.null(tp()$annotations)) {
+      
+        updateSelectInput(session, "select_ontology",
+          label = "Select an ontology for annotation enrichment",
+          choices =  tp()$annotations %>% 
+            distinct(term) %>% 
+            pull() %>% 
+            purrr::discard(~ .x %in% c("description", "gene_id_entrez", "gene_id_ensemble", "gene_name"))
+        )
+        
+        shinyjs::enable("select_ontology")
+        
+      } else {
+        
+        updateSelectInput(session, "select_ontology",
+          label = "No annotations were provided in the uploaded data",
+          choices = NULL
+        )
+        
+        shinyjs::disable("select_ontology")
+        
+      }
       
     })
     

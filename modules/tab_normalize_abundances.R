@@ -139,6 +139,18 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     outputOptions(output, "tab_subset_availability", suspendWhenHidden = FALSE)
     
     
+    observeEvent(tp(), {
+      
+      map(
+        .x = c(
+          "box_heatmap"
+        ),
+        .f = ~ {if (tp()$analyte == "peptides") shinyjs::hide(.x) else shinyjs::show(.x)}
+      )
+      
+    })
+    
+    
     observe({
       
       if (is.null(tp()) | is.null(input$select_normalization_method)) shinyjs::disable("action_normalize") else shinyjs::enable("action_normalize")
@@ -312,8 +324,16 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
       
       isolate({
         
+        if (tp_normalized()$analyte == "peptides") {
+          
+          NULL
+          
+        } else {
+        
         tp_normalized() %>% 
           plot_heatmap()
+          
+        }
         
       })
       

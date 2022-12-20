@@ -20,7 +20,7 @@ tab_introduction_ui <- function(id) {
           tags$img(src = "logo.png", style="height: 100px; margin-right: 20px; margin-bottom: 20px; float:left;"),
           HTML("This application provides an interactive user interface for the R
           package <a href='https://jeffsocal.github.io/tidyproteomics/' target='_blank' rel='noopener noreferrer' style='font-weight:600;'>tidyproteomics</a>. Users may upload their protein- or
-          peptide-level for abundance subsetting, contaminant removal, abundance
+          peptide-level data for abundance subsetting, contaminant removal, abundance
           normalization, differential expression analysis, and ontology
           enrichment.")
         ),

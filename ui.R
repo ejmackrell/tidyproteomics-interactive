@@ -42,6 +42,7 @@ ui <- dashboardPage(
   ),
   body = dashboardBody(
     useShinyjs(),
+    useShinyFeedback(),
     use_theme(
       create_theme(
         bs4dash_font(

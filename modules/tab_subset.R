@@ -38,7 +38,7 @@ tab_subset_ui <- function(id) {
             column(4,
               shinyjs::hidden(
                 textInput(ns("text_subsetting_value"),
-                  label = "Input a value for subsetting"
+                  label = "Provide a value for subsetting"
                 ),
                 selectInput(ns("select_logical_subsetting_value"),
                   label = "Select a value for subsetting",
@@ -243,6 +243,56 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
           )
       )
       
+      if (tp()$analyte == "peptides") {
+        
+        updateCheckboxInput(session, "checkbox_subset_contamination",
+          label = "Remove contamination by subsetting with pattern?",
+          value = FALSE
+        )
+        
+        map(
+          .x = c(
+            "checkbox_subset_contamination",
+            "text_contaminant_pattern",
+            "contamination_output"
+          ),
+          .f = ~ shinyjs::hide(.x)
+        )
+        
+        map(
+          .x = c(
+            "box_contaminant_selection",
+            "box_contamination_statistics"
+          ),
+          .f = ~ updateBox(.x, "remove")
+        )
+        
+      } else {
+        
+        updateCheckboxInput(session, "checkbox_subset_contamination",
+          label = "Remove contamination by subsetting with pattern?",
+          value = TRUE
+        )
+        
+        map(
+          .x = c(
+            "checkbox_subset_contamination",
+            "text_contaminant_pattern",
+            "contamination_output"
+          ),
+          .f = ~ shinyjs::show(.x)
+        )
+        
+        map(
+          .x = c(
+            "box_contaminant_selection",
+            "box_contamination_statistics"
+          ),
+          .f = ~ updateBox(.x, "restore")
+        )
+        
+      }
+      
     })
     
     
@@ -272,6 +322,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       }
       
     })
+    
+    
     
     
     observe({
@@ -304,6 +356,36 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       ) shinyjs::disable("action_subset") else shinyjs::enable("action_subset")
       
       if (input$text_subsetted_contaminant_pattern == "") shinyjs::disable("action_contaminant_summarize") else shinyjs::enable("action_contaminant_summarize")
+      
+    })
+    
+
+    
+    observeEvent(input$text_subsetting_value, {
+      
+      if (input$text_subsetting_value == "") {
+        
+        showFeedbackWarning("text_subsetting_value", text = NULL, icon = NULL)
+        
+      } else {
+        
+        hideFeedback("text_subsetting_value")
+        
+      }
+      
+    })
+    
+    observeEvent(input$text_contaminant_pattern, {
+      
+      if (input$text_contaminant_pattern == "") {
+        
+        showFeedbackWarning("text_contaminant_pattern", text = NULL, icon = NULL)
+        
+      } else {
+        
+        hideFeedback("text_contaminant_pattern")
+        
+      }
       
     })
     
@@ -409,7 +491,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
         tp_subset() %>% 
           summary(input$select_summary_table, destination = "return") %>% 
           reactable(
-            elementId = "test_reactable",
             sortable = TRUE,
             filterable = TRUE,
             searchable = TRUE,
@@ -559,8 +640,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       }
 
     })
-    
-    
     
   })
   

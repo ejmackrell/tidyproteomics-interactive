@@ -149,3 +149,10 @@ label:not(.form-check-label):not(.custom-file-label) {
     display: none;
 }
 
+.shiny-notification {
+    position: fixed;
+    top: 58px;
+    right: 10px;
+    min-width: 200px;
+    /* margin-right: -1766px; */
+}

@@ -67,14 +67,14 @@ tab_expression_analysis_ui <- function(id) {
 }
 
 
-tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression) {
+tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_expression) {
   
   moduleServer(id, function(input, output, session) {
     
     
     output$tab_subset_availability <- reactive({  
       
-      if (is.null(tp())) FALSE else TRUE
+      if (is.null(tp())) FALSE else if (tp()$analyte == "peptides") FALSE else TRUE
       
     })
     
@@ -88,13 +88,38 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
     })
     
     
-    experiments <- reactiveVal(NULL)
     
+    experiments <- reactiveVal(NULL)
 
     observeEvent(tp(), {
       
       if (!setequal(experiments(), tp()$experiments$sample)) experiments(tp()$experiments$sample %>% unique())
       
+    })
+    
+
+    observe({
+      
+      shiny::req(tp())
+      
+      # Use normalized object (only non-null through normalization only or subset+normalization)
+      # for contrast construction
+      if (!is.null(tp_normalized())) {
+
+        if (!setequal(experiments(), tp_normalized()$experiments$sample)) experiments(tp_normalized()$experiments$sample %>% unique())
+      
+      # Use subset object (when normalization not active))
+      # for contrast construction
+      } else if (is.null(tp_normalized()) & !is.null(tp_subset())) {
+        
+        if (!setequal(experiments(), tp_subset()$experiments$sample)) experiments(tp_subset()$experiments$sample %>% unique())
+        
+      } else {
+       
+        if (!setequal(experiments(), tp()$experiments$sample)) experiments(tp()$experiments$sample %>% unique())
+         
+      }
+        
     })
     
     
@@ -122,6 +147,8 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
           selected = experiments()[2]
         )
         
+        shinyjs::enable("action_expression_analysis")
+        
       } else {
         
         map(
@@ -134,13 +161,17 @@ tab_expression_analysis_server <- function(id, tp, tp_normalized, tp_expression)
         
         updateSelectInput(session, "select_group_one",
           label = "Differential expression analysis requires > 1 sample group",
-          choices = NULL
+          choices = experiments(),
+          selected = experiments()[1]
         )
         
         updateSelectInput(session, "select_group_two",
           label = "Differential expression analysis requires > 1 sample group",
-          choices = NULL
+          choices = experiments(),
+          selected = experiments()[1]
         )
+        
+        shinyjs::disable("action_expression_analysis")
          
       }
       

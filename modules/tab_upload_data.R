@@ -18,7 +18,9 @@ tab_upload_data_ui <- function(id) {
           selectInput(ns("select_data_type"),
             label = "Select a data type",
             choices = list(
-              "Proteome Discoverer" = "ProteomeDiscoverer"#,
+              "Proteome Discoverer" = "ProteomeDiscoverer",
+              "Skyline" = "Skyline",
+              "DIA-NN" = "DIA-NN"
               # "MaxQuant" = "MaxQuant"
             ),
             width = "300px"
@@ -26,19 +28,20 @@ tab_upload_data_ui <- function(id) {
           selectInput(ns("select_analyte_type"),
             label = "Select an analyte type",
             choices = list(
-              "Proteins" = "proteins"#,
-              # "Peptides" = "peptides"
+              "Proteins" = "proteins",
+              "Peptides" = "peptides"
             ),
             selected = "proteins",
             width = "300px"
           ),
           br(),
           
+          uiOutput(ns("dynamic_file_input")), 
           # Expand to allow .csv?
-          fileInput(ns("upload_table"),
-            label = "Upload a search file (.xlsx)",
-            accept = c(".xlsx")
-          ),
+          # fileInput(ns("upload_table"),
+          #   label = "Upload a search file (.xlsx, .csv, .tsv)",
+          #   accept = c(".xlsx", ".csv", ".tsv")
+          # ),
           
           br(),
           actionButton(ns("action_upload_table"),
@@ -130,7 +133,7 @@ tab_upload_data_ui <- function(id) {
 }
 
 
-tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized) {
+tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expression, tp_enrichment) {
   
   moduleServer(id, function(input, output, session) {
     
@@ -141,6 +144,64 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    observeEvent(input$select_data_type, {
+      
+      if (input$select_data_type == "ProteomeDiscoverer") {
+        
+        updateSelectInput(session, "select_analyte_type",
+          label = "Select an analyte type",
+          choices = list(
+            "Proteins" = "proteins",
+            "Peptides" = "peptides"
+          )
+        )
+        
+      } else if (input$select_data_type == "Skyline" | input$select_data_type == "DIA-NN") {
+        
+        updateSelectInput(session, "select_analyte_type",
+          label = "Select an analyte type",
+          choices = list(
+            "Peptides" = "peptides"
+          )
+        )
+        
+      }
+      
+    })
+    
+    
+    output$dynamic_file_input <- renderUI({
+      
+      input$select_data_type
+      
+      isolate({
+      
+        if (input$select_data_type == "ProteomeDiscoverer") {
+          
+          fileInput("tab_upload_data-upload_table",
+            label = "Upload a ProteomeDiscoverer search file (.xlsx)",
+            accept = c(".xlsx")
+          )
+          
+        } else if (input$select_data_type == "Skyline") {
+          
+          fileInput("tab_upload_data-upload_table",
+            label = "Upload a Skyline search file (.csv)",
+            accept = c(".csv")
+          )
+          
+        } else if (input$select_data_type == "DIA-NN") {
+          
+          fileInput("tab_upload_data-upload_table",
+            label = "Upload a DIA-NN search file (.tsv)",
+            accept = c(".tsv")
+          )
+          
+        }
+        
+      })
+      
+    })
     
     observeEvent(input$action_upload_table, {
       
@@ -151,14 +212,27 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized) {
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
+      map(
+        .x = c(
+          "box_contaminant_selection",
+          "box_contamination_statistics"
+        ),
+        .f = ~ {if (input$select_analyte_type == "peptides") updateBox(.x, "remove") else updateBox(.x, "restore")}
+      )
+      
     })
     
     
     set_tp <- eventReactive(input$action_upload_table, {
       
+      # browser()
+      
+      renamed_files <- input$upload_table %>% 
+        rename_uploaded_file()
+      
       tp(
         tidyproteomics::import(
-          files = input$upload_table$datapath,
+          files = renamed_files$datapath,
           platform = input$select_data_type,
           analyte = input$select_analyte_type
         )
@@ -167,6 +241,8 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized) {
       # Reset subsetted and normalized objects upon upload of new data
       tp_subset(NULL)
       tp_normalized(NULL)
+      tp_expression(NULL)
+      tp_enrichment(NULL)
       
       tp()
       
