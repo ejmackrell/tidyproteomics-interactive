@@ -36,7 +36,7 @@ tab_enrichment_analysis_ui <- function(id) {
         title = "Annotation enrichment plot",
         status = "info",
         id = ns("box_annotation_enrichment_plot"),
-        width = 10,
+        width = 12,
         collapsed = TRUE,
         plotlyOutput(ns("plotly_annotation_enrichment")) %>% withSpinner(type = 8)
       ),

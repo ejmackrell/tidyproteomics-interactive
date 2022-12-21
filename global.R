@@ -5,6 +5,7 @@ library(fresh)
 library(shinycssloaders)
 library(shinyWidgets)
 library(shinyjs)
+library(shinyFeedback)
 library(tippy)
 
 library(dplyr)
@@ -26,8 +27,24 @@ source("modules/tab_introduction.R")
 
 options(
   spinner.size = 0.75,
-  spinner.color = "#5e8cbe7a"
+  spinner.color = "#5e8cbe7a",
+  shiny.maxRequestSize = 30 * 1024^2,
+  cli.progress_show_after = 0
 )
+
+Sys.setenv(NO_COLOR = 1)
+  
+
+rename_uploaded_file <- function(x) {
+  
+  old <- x$datapath
+  new <- file.path(dirname(old), x$name)
+  file.rename(old, new)
+  
+  x$datapath <- new
+  x
+  
+}
 
 imputation_methods <- list(
   "min" = base::min,
@@ -109,7 +126,7 @@ render_enrichment_reactable <- JS("function(cellInfo, state) {
 subsetting_operators <- list(
   "character" = list(
     "%like%",
-    # "%!like%",
+    "! %like%",
     "==",
     "!="
   ),

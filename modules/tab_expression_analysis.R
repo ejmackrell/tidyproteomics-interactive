@@ -49,7 +49,97 @@ tab_expression_analysis_ui <- function(id) {
         width = 12,
         height = 650,
         collapsed = TRUE,
-        plotlyOutput(ns("plot_volcano_plot"), height = 600) %>% withSpinner(type = 8)
+        plotlyOutput(ns("plot_volcano_plot"), height = 600) %>% withSpinner(type = 8),
+        sidebar = boxSidebar(
+          id = ns("box_volcano_plot_sidebar"),
+          easyClose = FALSE,
+          # background = "#2d537c",
+          background = "#e9e9e9",
+          # width = 32,
+          fluidRow(
+            column(6,
+              selectInput(ns("select_volcano_x_axis"),
+                label = "Select an x-axis variable",
+                choices = c(
+                  "log2(foldchange)" = "log2_foldchange",
+                  "foldchange" = "foldchange"
+                ),
+                selected = "log2_foldchange"
+              )
+            ),
+            column(6,
+              selectInput(ns("select_volcano_y_axis"),
+                label = "Select a y-axis variable",
+                choices = c(
+                  "p-value" = "p_value",
+                  "adjusted p-value" = "adj_p_value",
+                  "-log10(p-value)" = "-log10(p_value)",
+                  "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+                ),
+                selected = "-log10(adj_p_value)"
+              )
+            )
+          ),
+          fluidRow(
+            column(6,
+              selectInput(ns("select_volcano_color"),
+                label = "Select a color variable",
+                choices = c(
+                  "fixed" = "fixed",
+                  "log10(average expression)" = "log10(average_expression)",
+                  "log10(proportional expression)" = "log10(proportional_expression)",
+                  "imputed" = "imputed",
+                  "p-value" = "p_value",
+                  "adjusted p-value" = "adj_p_value",
+                  "-log10(p-value)" = "-log10(p_value)",
+                  "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+                ),
+                selected = "fixed"
+              )
+            ),
+            column(6,
+              colorPickr(ns("pick_volcano_color"),
+                label = "Choose a color",
+                selected = "#1049B0"
+              )
+            )
+          ),
+          fluidRow(
+            column(6,
+              sliderInput(ns("slider_volcano_marker_alpha"),
+                label = "Set marker opacity",
+                value = 0.5,
+                min = 0,
+                max = 1
+              )
+            )
+          ),
+          fluidRow(
+            column(6,
+              selectInput(ns("select_volcano_size"),
+                label = "Select a size variable",
+                choices = c(
+                  "fixed" = "fixed",
+                  "log10(average expression)" = "log10(average_expression)",
+                  "log10(proportional expression)" = "log10(proportional_expression)",
+                  "imputed" = "imputed",
+                  "p-value" = "p_value",
+                  "adjusted p-value" = "adj_p_value",
+                  "-log10(p-value)" = "-log10(p_value)",
+                  "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+                )
+              )
+            )
+          ),
+          br(),
+          fluidRow(
+            column(12,
+              actionButton(ns("action_replot_volcano"),
+                label = "Update plot"
+              )
+            )
+          )
+        )
       ),
       
       box(
@@ -58,6 +148,13 @@ tab_expression_analysis_ui <- function(id) {
         id = ns("box_table_differential_expression"),
         width = 12,
         collapsed = TRUE,
+        actionButton(ns("table_download"), 
+          label = "Download table",
+          icon = icon("download")
+        ) %>% 
+          shiny::tagAppendAttributes(
+            onclick = glue("Reactable.downloadDataCSV('{ns('table_differential_expression')}', 'expression_analysis.csv')")
+          ),
         reactableOutput(ns("table_differential_expression")) %>% withSpinner(type = 8)
       )
       
@@ -94,6 +191,13 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     observeEvent(tp(), {
       
       if (!setequal(experiments(), tp()$experiments$sample)) experiments(tp()$experiments$sample %>% unique())
+      
+    })
+    
+    
+    observe({
+      
+      if (input$select_volcano_color == "fixed") shinyjs::show("pick_volcano_color") else shinyjs::hide("pick_volcano_color")
       
     })
     
@@ -268,21 +372,29 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     output$plot_volcano_plot <- renderPlotly({
       
       input$action_expression_analysis
+      input$action_replot_volcano
       
       isolate({
         
+        # browser()
+        
         shiny::req(tp_expression()$analysis)
         
-        tp_expression_analysis_annotated() %>% 
-          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>% 
+        tp_expression_analysis_annotated() %>%
+          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
           plotly::plot_ly(
             type = "scattergl",
-            x = ~ log2_foldchange,
-            y = ~ -log10(p_value),
-            color = ~ imputed,
-            size = ~ log10(average_expression),
-            sizes = c(1,100),
-            alpha = 0.5,
+            x = ~ isolate(eval(parse_expr(input$select_volcano_x_axis))),
+            y = ~ isolate(eval(parse_expr(input$select_volcano_y_axis))),
+            color = if (input$select_volcano_color != "fixed") {~ isolate(eval(parse_expr(input$select_volcano_color)))},
+            marker = if (input$select_volcano_color == "fixed") list(
+              color =  input$pick_volcano_color,
+              line = list(width = 0),
+              opacity = input$slider_volcano_marker_alpha
+            ) else list(line = list(width = 0)),
+            size = if (input$select_volcano_size != "fixed") {~ isolate(eval(parse_expr(input$select_volcano_size)))},
+            sizes = c(10,100),
+            alpha = input$slider_volcano_marker_alpha,
             hoverinfo = 'text',
             text = glue::glue("accession: {.$protein}
             {if ('gene_name' %in% colnames(.)) invisible(glue('gene name: {.$gene_name}'))}
@@ -291,13 +403,32 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
             log2FC: {round(.$log2_foldchange, digits = 3)}
             adjusted p-value: {formatC(.$adj_p_value, format = 'e', digits = 2)}
             imputed: {round(.$imputed, digits = 3)}")
-          ) %>% 
+          ) %>%
           plotly::layout(
             title = list(
               text = glue::glue("{input$select_group_one} vs. {input$select_group_two}")
             ),
+            xaxis = list(
+              title = input$select_volcano_x_axis,
+              zeroline = FALSE,
+              showline = TRUE,
+              ticks = "outside"
+            ),
+            yaxis = list(
+              title = input$select_volcano_y_axis,
+              zeroline = FALSE,
+              showline = TRUE,
+              ticks = "outside"
+            ),
+            font = list(
+              family = "Segoe UI"
+            ),
             margin = list(b = 80, l = 80, r = 80, t = 80)
+          ) %>% 
+          plotly::colorbar(
+            title = if (input$select_volcano_color != "fixed") input$select_volcano_color else NULL
           )
+
       })
       
     })

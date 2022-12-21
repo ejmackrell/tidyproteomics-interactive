@@ -406,10 +406,22 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
         tp() %>%
           {
             if (input$checkbox_enable_subsetting) {
+              
               if (subset_variable_type == "logical") {
+                
                 subset(., !!paste(chosen_subset_variable, input$select_operator, input$select_logical_subsetting_value))
+                
               } else {
-                subset(., !!paste(chosen_subset_variable, input$select_operator, input$text_subsetting_value))
+                
+                if (input$select_operator == "! %like%") {
+                  
+                  subset(., !!paste(paste0("!",chosen_subset_variable), "%like%", input$text_subsetting_value))
+                  
+                } else {
+                  
+                  subset(., !!paste(chosen_subset_variable, input$select_operator, input$text_subsetting_value))
+                  
+                }
               }
             } else .
           } %>% 
