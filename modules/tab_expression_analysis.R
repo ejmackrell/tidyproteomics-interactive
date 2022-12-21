@@ -37,6 +37,7 @@ tab_expression_analysis_ui <- function(id) {
             "limma"
           )
         ),
+        br(),
         actionButton(ns("action_expression_analysis"),
           label = "Run expression analysis"
         )

@@ -23,6 +23,19 @@ tab_normalize_abundances_ui <- function(id) {
         #   value = TRUE
         # ),
         # br(),
+        selectInput(ns("select_normalization_method"),
+          label = "Select normalization methods",
+          width = "300px",
+          choices = list(
+            "median",
+            "linear",
+            "limma",
+            "loess",
+            "randomforest"
+          ),
+          multiple = TRUE
+        ),
+        br(),
         awesomeCheckbox(ns("checkbox_impute"),
           label = "Impute missing values?",
           value = TRUE
@@ -54,18 +67,6 @@ tab_normalize_abundances_ui <- function(id) {
           )
         ),
         br(),
-        selectInput(ns("select_normalization_method"),
-          label = "Select normalization methods",
-          width = "300px",
-          choices = list(
-            "median",
-            "linear",
-            "limma",
-            "loess",
-            "randomforest"
-          ),
-          multiple = TRUE
-        ),
         actionButton(ns("action_normalize"),
           label = "Run normalization"
         )
