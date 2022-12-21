@@ -173,3 +173,12 @@ label:not(.form-check-label):not(.custom-file-label) {
 .direct-chat-contacts {
   border-left: 1px solid #a3a3a3;
 }
+
+.enrichment-subtable .rt-pagination  {
+  background: whitesmoke !important;
+}
+
+
+
+
+

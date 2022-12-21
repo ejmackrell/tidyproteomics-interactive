@@ -199,7 +199,18 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
       
       isolate({
         
-        tp_enrichment() %>% 
+        tp_enrichment_annotations <- tp_enrichment() %>% 
+          export_analysis(!!input$select_contrast,
+          .analysis = "expression"
+          ) %>% 
+          select(input$select_ontology, protein, {if ("gene_name" %in% colnames(.)) "gene_name"}, {if ("description" %in% colnames(.)) "description"}, log2_foldchange, adj_p_value) %>% 
+          tidyr::separate_rows(input$select_ontology, sep = ";") %>% 
+          distinct() %>% 
+          if ("description" %in% colnames(.)) {
+            mutate(., description = {description %>% stringr::str_match(pattern = stringr::regex('^(.*) OS'))}[,2])
+          } else .
+
+        tp_enrichment() %>%
           pluck("analysis", input$select_contrast, "enrichment", input$select_ontology) %>%
           reactable(
             elementId = "test_table",
@@ -216,7 +227,31 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
               annotation = colDef(
                 minWidth = 300
               )
-            )
+            ),
+            details = function(index) {
+              
+              if (nrow(.) < 200) {
+                
+                htmltools::div(
+                  class = "enrichment-subtable",
+                  br(),
+                  reactable(
+                    data = filter(tp_enrichment_annotations, tp_enrichment_annotations[[input$select_ontology]] == .$annotation[index]) %>% 
+                      arrange(adj_p_value),
+                    compact = TRUE,
+                    highlight = TRUE,
+                    resizable = TRUE,
+                    defaultColDef = colDef(
+                      cell = render_expression_reactable,
+                      headerStyle = list(background = "#f7f7f8")
+                    )
+                  ),
+                  br()
+                )
+                
+              } 
+              
+            }
           )
         
       })
