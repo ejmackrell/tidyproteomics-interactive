@@ -35,7 +35,8 @@ tab_expression_analysis_ui <- function(id) {
             "Wilcoxon test",
             "Kolmogorov-Smirnov test",
             "limma"
-          )
+          ),
+          width = "200px"
         ),
         br(),
         actionButton(ns("action_expression_analysis"),
@@ -156,7 +157,47 @@ tab_expression_analysis_ui <- function(id) {
           shiny::tagAppendAttributes(
             onclick = glue("Reactable.downloadDataCSV('{ns('table_differential_expression')}', 'expression_analysis.csv')")
           ),
-        reactableOutput(ns("table_differential_expression")) %>% withSpinner(type = 8)
+        reactableOutput(ns("table_differential_expression")) %>% withSpinner(type = 8),
+        sidebar = boxSidebar(
+          id = ns("box_table_differential_expression_sidebar"),
+          easyClose = FALSE,
+          background = "#e9e9e9",
+          fluidRow(
+            column(6,
+              awesomeCheckbox(ns("checkbox_table_filter_p_values"),
+                label = "Filter by adjusted p-value?",
+                value = FALSE
+              ),
+              sliderTextInput(ns("slider_table_p_value_filter"),
+                label = "accepted adj. p-values",
+                choices = c(0, 1e-3, 1e-2, 5e-2, 1e-1, 1),
+                selected = c(0, 5e-2)
+              )
+            ),
+            column(6,
+              awesomeCheckbox(ns("checkbox_table_filter_log2fc_values"),
+                label = "Filter by log2(foldchange)?",
+                value = FALSE
+              ),
+              sliderInput(ns("slider_table_log2fc_value_filter"),
+                label = "excluded log2(foldchange) values",
+                min = -4,
+                max = 4,
+                step = 0.1,
+                value = c(-1,1),
+                ticks = FALSE
+              )
+            )
+          ),
+          br(),
+          fluidRow(
+            column(12,
+              actionButton(ns("action_filter_table"),
+                label = "Update table"
+              )
+            )
+          )
+        )
       )
       
     )
@@ -196,9 +237,37 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    observeEvent(input$action_expression_analysis, {
+      
+      map(
+        .x = c(
+          "box_volcano_plot",
+          "box_table_differential_expression"
+        ),
+        .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
+      )
+      
+      map(
+        .x = c(
+          "checkbox_table_filter_p_values",
+          "slider_table_p_value_filter",
+          "checkbox_table_filter_log2fc_values",
+          "slider_table_log2fc_value_filter",
+          "action_filter_table"
+        ),
+        .f = ~ shinyjs::reset(.x)
+      )
+        
+      
+    }, priority = 1)
+    
+    
     observe({
       
       if (input$select_volcano_color == "fixed") shinyjs::show("pick_volcano_color") else shinyjs::hide("pick_volcano_color")
+      
+      if (input$checkbox_table_filter_p_values) shinyjs::enable("slider_table_p_value_filter") else shinyjs::disable("slider_table_p_value_filter")
+      if (input$checkbox_table_filter_log2fc_values) shinyjs::enable("slider_table_log2fc_value_filter") else shinyjs::disable("slider_table_log2fc_value_filter")
       
     })
     
@@ -307,16 +376,10 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
     })
     
-    
-    observeEvent(input$action_expression_analysis, {
+
+    set_tp_expression <- eventReactive(input$action_expression_analysis, {
       
-      map(
-        .x = c(
-          "box_volcano_plot",
-          "box_table_differential_expression"
-        ),
-        .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
-      )
+      tp_expression_analysis_annotated_filtered(NULL)
       
       if (input$checkbox_use_normalized_values) {
         
@@ -326,7 +389,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
               .method = statistical_methods[[input$select_statistical_method]]
             )
         )
-      
+        
+        tp_expression()
+        
       } else {
         
         tp_expression(
@@ -336,12 +401,14 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
             )
         )
         
+        tp_expression()
+        
       }
       
     })
     
     
-    tp_expression_analysis_annotated <- eventReactive(input$action_expression_analysis, {
+    tp_expression_analysis_annotated <- eventReactive(set_tp_expression(), {
       
       annotation_columns <- tp_expression()$annotation %>% 
         filter(term %in% c("gene_name", "description")) %>% 
@@ -370,9 +437,28 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    tp_expression_analysis_annotated_filtered <- reactiveVal(NULL)
+    
+    observeEvent(input$action_filter_table, {
+      
+      tp_expression_analysis_annotated_filtered(
+        tp_expression_analysis_annotated() %>%
+          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
+          arrange(adj_p_value) %>%
+          {
+            if (input$checkbox_table_filter_p_values) filter(., data.table::between(.$adj_p_value, input$slider_table_p_value_filter[1], input$slider_table_p_value_filter[2])) else .
+          } %>%
+          {
+            if (input$checkbox_table_filter_log2fc_values) filter(., !data.table::between(.$log2_foldchange, input$slider_table_log2fc_value_filter[1], input$slider_table_log2fc_value_filter[2], incbounds = FALSE)) else .
+          }
+      )
+      
+    })
+    
+    
     output$plot_volcano_plot <- renderPlotly({
       
-      input$action_expression_analysis
+      shiny::req(set_tp_expression())
       input$action_replot_volcano
       
       isolate({
@@ -433,19 +519,28 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       })
       
     })
-    
-    
+
+
     output$table_differential_expression <- reactable::renderReactable({
-      
-      input$action_expression_analysis
-      
+
+      shiny::req(set_tp_expression())
+      input$action_filter_table
+
       isolate({
-        
+
         shiny::req(tp_expression()$analysis)
         
-        tp_expression_analysis_annotated() %>% 
-          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
-          arrange(adj_p_value) %>% 
+        {if (is.null(tp_expression_analysis_annotated_filtered())) {
+          
+          tp_expression_analysis_annotated() %>%
+                pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
+                arrange(adj_p_value)
+          
+        } else {
+          
+          tp_expression_analysis_annotated_filtered()
+          
+        }} %>% 
           reactable(
             sortable = TRUE,
             highlight = TRUE,
@@ -468,9 +563,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
               )
             )
           )
-        
+
       })
-      
+
     })
     
   })

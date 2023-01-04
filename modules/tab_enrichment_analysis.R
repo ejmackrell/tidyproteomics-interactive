@@ -47,6 +47,13 @@ tab_enrichment_analysis_ui <- function(id) {
         id = ns("box_annotation_enrichment_table"),
         width = 12,
         collapsed = TRUE,
+        actionButton(ns("table_download"), 
+          label = "Download table",
+          icon = icon("download")
+        ) %>% 
+          shiny::tagAppendAttributes(
+            onclick = glue("Reactable.downloadDataCSV('{ns('table_annotation_enrichment')}', 'enrichment_analysis.csv')")
+          ),
         reactableOutput(ns("table_annotation_enrichment")) %>% withSpinner(type = 8)
       )
       
@@ -163,7 +170,10 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
-      # browser()
+    })
+    
+    
+    set_tp_enrichment <- eventReactive(input$action_enrichment, {
       
       tp_enrichment(
         tp_expression() %>% 
@@ -173,12 +183,14 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
           )
       )
       
+      tp_enrichment()
+      
     })
     
     
     output$plotly_annotation_enrichment <- renderPlotly({
       
-      input$action_enrichment
+      shiny::req(set_tp_enrichment())
       
       isolate({
         
@@ -195,7 +207,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     
     output$table_annotation_enrichment <- renderReactable({
       
-      input$action_enrichment
+      shiny::req(set_tp_enrichment())
       
       isolate({
         
@@ -213,7 +225,6 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         tp_enrichment() %>%
           pluck("analysis", input$select_contrast, "enrichment", input$select_ontology) %>%
           reactable(
-            elementId = "test_table",
             sortable = TRUE,
             highlight = TRUE,
             resizable = TRUE,

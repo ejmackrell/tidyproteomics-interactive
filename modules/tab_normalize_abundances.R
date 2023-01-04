@@ -14,15 +14,6 @@ tab_normalize_abundances_ui <- function(id) {
       
       box(
         title = "Normalization selection",
-        # awesomeCheckbox(ns("checkbox_drop_contaminants"),
-        #   label = "Drop contaminant proteins?",
-        #   value = TRUE
-        # ),
-        # awesomeCheckbox(ns("checkbox_use_subset"),
-        #   label = "Use subsetted data?",
-        #   value = TRUE
-        # ),
-        # br(),
         selectInput(ns("select_normalization_method"),
           label = "Select normalization methods",
           width = "300px",
@@ -86,7 +77,7 @@ tab_normalize_abundances_ui <- function(id) {
         status = "info",
         id = ns("box_abundance_cvs_and_dynamic_range"),
         plotlyOutput(ns("plotly_abundance_cvs_and_dynamic_range")) %>% withSpinner(type = 8),
-        plotOutput(ns("plot_dynamic_range")) %>% withSpinner(type = 8),
+        plotOutput(ns("plot_dynamic_range"), height = "650px") %>% withSpinner(type = 8),
         width = 12,
         collapsed = TRUE
       ),
@@ -113,7 +104,7 @@ tab_normalize_abundances_ui <- function(id) {
         id = ns("box_heatmap"),
         width = 12,
         collapsed = TRUE,
-        plotOutput(ns("plot_heatmap")) %>% withSpinner(type = 8)
+        plotOutput(ns("plot_heatmap"), height = "650px") %>% withSpinner(type = 8)
         # InteractiveComplexHeatmapOutput(ns("plot_interactive_heatmap"))
       )
       
@@ -253,7 +244,12 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
         tp_normalized() %>% 
           plot_normalization() %>% 
           ggplotly() %>% 
-          layout(boxmode = "group")
+          layout(
+            boxmode = "group",
+            font = list(
+              family = "Segoe UI"
+            )
+          )
         
       })
         
@@ -270,7 +266,12 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
         
         tp_normalized() %>% 
           plot_variation_cv() %>% 
-          ggplotly()
+          ggplotly() %>% 
+          plotly::layout(
+            font = list(
+              family = "Segoe UI"
+            )
+          )
         
       })
       
@@ -297,9 +298,18 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
       
       isolate({
         
-        tp_normalized() %>% 
-          plot_pca() %>% 
-          ggplotly()
+        pca_ggplot <- tp_normalized() %>% 
+          plot_pca_mod()
+          
+        pca_ggplot %>% 
+          ggplotly() %>% 
+          plotly::layout(
+            margin = list(t = 100),
+            title = list(text = glue("{pca_ggplot$labels$title}<br><sup>{pca_ggplot$labels$subtitle}</sup>")),
+            font = list(
+              family = "Segoe UI"
+            )
+          )
         
       })
       
@@ -313,7 +323,13 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
         
         tp_normalized() %>% 
           plot_variation_pca() %>% 
-          ggplotly()
+          ggplotly() %>% 
+          plotly::layout(
+            margin = list(t = 100),
+            font = list(
+              family = "Segoe UI"
+            )
+          )
         
       })
       

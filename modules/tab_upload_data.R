@@ -225,8 +225,6 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     set_tp <- eventReactive(input$action_upload_table, {
       
-      # browser()
-      
       renamed_files <- input$upload_table %>% 
         rename_uploaded_file()
       

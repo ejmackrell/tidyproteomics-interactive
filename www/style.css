@@ -5,8 +5,9 @@
 .brand-link .brand-image {
     float: left;
     line-height: .8;
-    margin-right: .5rem;
+    margin-right: .75rem;
     margin-top: -6px !important;
+    margin-bottom: -6px !important;
     max-height: 37px !important;
     width: auto;
 }
@@ -178,7 +179,13 @@ label:not(.form-check-label):not(.custom-file-label) {
   background: whitesmoke !important;
 }
 
+.Reactable .rt-tfoot, .Reactable .rt-thead {
+    z-index: 1 !important;
+}
 
+.img-circle {
+  border-radius: 0% !important;
+}
 
 
 
