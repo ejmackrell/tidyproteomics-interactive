@@ -51,10 +51,11 @@ tab_introduction_ui <- function(id) {
             title = "Data input and summary",
             icon = icon("file-arrow-up"),
             color = "info",
-            "Users may upload an Excel file containing peptide- or protein-level data
-            outputs from Proteome Discoverer and MaxQuant searches. After the file is
-            processed into a tidyproteomics object, the user may view its attributes,
-            such as annotation information, sample identifiers, and raw protein abundances."
+            "Users may upload an Excel file containing peptide- or
+            protein-level data outputs from Proteome Discoverer and MaxQuant
+            searches. After the file is processed into a tidyproteomics
+            object, the user may view its attributes, such as annotation
+            information, sample identifiers, and raw protein abundances."
           ),
           
           timelineLabel("Data preprocessing"),
@@ -62,18 +63,19 @@ tab_introduction_ui <- function(id) {
             title = "Data subsetting and summary",
             icon = icon("filter"),
             color = "info",
-            "Users may subset their data by any of the qualitative or quantitative
-            variables present across the experiments, accounting, or annotation attributes
-            of the data set. Users may also specify a text pattern for removing contaminant
-            proteins from their data."
+            "Users may subset their data by any of the qualitative or
+            quantitative variables present across the experiments, accounting,
+            or annotation attributes of the data set. Users may also specify a
+            text pattern for removing contaminant proteins from their data."
           ),
           timelineItem(
             title = "Abundance normalization",
             icon = icon("scale-balanced"),
             color = "info",
-            "Once data are uploaded and optionally subsetted, users can specify a method
-            for imputing missing protein abundance values. Imputation can be specified to occur
-            before or after protein abundance normalization, which can be performed using the methods
+            "Once data are uploaded and optionally subsetted, users can
+            specify a method for imputing missing protein abundance values.
+            Imputation can be specified to occur before or after protein
+            abundance normalization, which can be performed using the methods
             chosen by the user in this tab."
           ),
           
@@ -82,10 +84,11 @@ tab_introduction_ui <- function(id) {
             title = "Expression analysis",
             icon = icon("volcano"),
             color = "info",
-            "Users may conduct differential expression analysis using the preprocessed
-            protein abundance values by specifying sample groups for comparison and
-            a statistical method for estimating fold changes and p-values. Results are
-            displayed in an interactive volcano plot and table."
+            "Users may conduct differential expression analysis using the
+            preprocessed protein abundance values by specifying sample groups
+            for comparison and a statistical method for estimating fold
+            changes and p-values. Results are displayed in an interactive
+            volcano or proportional plot and an accompanying table."
           ),
           
           timelineItem(

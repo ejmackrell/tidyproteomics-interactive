@@ -45,7 +45,7 @@ tab_expression_analysis_ui <- function(id) {
       ),
       
       box(
-        title = "Volcano plot",
+        title = "Volcano plot / Expression plot",
         status = "info",
         id = ns("box_volcano_plot"),
         width = 12,
@@ -76,7 +76,11 @@ tab_expression_analysis_ui <- function(id) {
                   "p-value" = "p_value",
                   "adjusted p-value" = "adj_p_value",
                   "-log10(p-value)" = "-log10(p_value)",
-                  "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+                  "-log10(adjusted p-value)" = "-log10(adj_p_value)",
+                  "average expression" = "average_expression",
+                  "proportional expression" = "proportional_expression",
+                  "log10(average expression)" = "log10(average_expression)",
+                  "log10(proportional expression)" = "log10(proportional_expression)"
                 ),
                 selected = "-log10(adj_p_value)"
               )
