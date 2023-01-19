@@ -20,8 +20,8 @@ tab_upload_data_ui <- function(id) {
             choices = list(
               "Proteome Discoverer" = "ProteomeDiscoverer",
               "Skyline" = "Skyline",
-              "DIA-NN" = "DIA-NN"
-              # "MaxQuant" = "MaxQuant"
+              "DIA-NN" = "DIA-NN",
+              "MaxQuant" = "MaxQuant"
             ),
             width = "300px"
           ),
@@ -35,14 +35,7 @@ tab_upload_data_ui <- function(id) {
             width = "300px"
           ),
           br(),
-          
-          uiOutput(ns("dynamic_file_input")), 
-          # Expand to allow .csv?
-          # fileInput(ns("upload_table"),
-          #   label = "Upload a search file (.xlsx, .csv, .tsv)",
-          #   accept = c(".xlsx", ".csv", ".tsv")
-          # ),
-          
+          uiOutput(ns("dynamic_file_input")),
           br(),
           actionButton(ns("action_upload_table"),
             label = "Import data"
@@ -59,74 +52,57 @@ tab_upload_data_ui <- function(id) {
         htmlOutput(ns("text_tidyproteomics_summary")) %>% withSpinner(type = 8, proxy.height = "250px")
       ),
       
-      box(
-        title = "Data feature selection",
-        # status = "secondary",
+      tabBox(
+        id = ns("tabbox_data_summary"),
+        type = "tabs",
+        width = 12,
+        status = "info",
         collapsed = TRUE,
-        id = ns("box_data_feature_selection"),
-        selectInput(ns("select_data_feature"),
-          label = "Please upload a data table to use this feature",
-          choices = NULL
+        tabPanel(
+          title = "Data feature selection",
+          collapsed = TRUE,
+          value = ns("box_data_feature_selection"),
+          selectInput(ns("select_data_feature"),
+            label = "Please upload a data table to use this feature",
+            choices = NULL
+          ),
+          actionButton(ns("action_view_feature"),
+            label = "View feature"
+          ),
+          br(),
+          reactableOutput(ns("table_data_feature")) %>% withSpinner(type = 8)
         ),
-        actionButton(ns("action_view_feature"),
-          label = "View feature"
+        tabPanel(
+          title = "Summary table selection",
+          collapsed = TRUE,
+          value = ns("box_summary_table_selection"),
+          selectInput(ns("select_summary_table"),
+            label = "Please upload a data table to use this feature",
+            choices = NULL
+          ),
+          actionButton(ns("action_summarize"),
+            label = "Summarize data"
+          ),
+          br(),
+          reactableOutput(ns("table_summary_sample")) %>% withSpinner(type = 8)
+        ),
+        tabPanel(
+          title = "Contaminant selection",
+          value = ns("box_contaminant_selection"),
+          collapsed = TRUE,
+          textInput(ns("text_contaminant_pattern"),
+            label = "Provide a contaminant pattern",
+            placeholder = "e.g., CRAP"
+          ),
+          actionButton(ns("action_contaminant_summarize"),
+            label = "Evaluate contaminant pattern"
+          ),
+          br(),
+          reactableOutput(ns("table_summary_contamination")) %>% withSpinner(type = 8)
         )
       ),
       
-      box(
-        title = "Data feature viewer",
-        status = "info",
-        collapsed = TRUE,
-        width = 12,
-        id = ns("box_data_feature_viewer"),
-        reactableOutput(ns("table_data_feature")) %>% withSpinner(type = 8)
-      ),
-      
-      box(
-        title = "Summary table selection",
-        # status = "secondary",
-        collapsed = TRUE,
-        id = ns("box_summary_table_selection"),
-        selectInput(ns("select_summary_table"),
-          label = "Please upload a data table to use this feature",
-          choices = NULL
-        ),
-        actionButton(ns("action_summarize"),
-          label = "Summarize data"
-        )
-      ),
-        
-      box(
-        title = "Summary statistics",
-        status = "info",
-        id = ns("box_summary_statistics"),
-        collapsed = TRUE,
-        width = 12,
-        reactableOutput(ns("table_summary_sample")) %>% withSpinner(type = 8)
-      ),
-      
-      box(
-        title = "Contaminant selection",
-        # status = "secondary",
-        id = ns("box_contaminant_selection"),
-        collapsed = TRUE,
-        textInput(ns("text_contaminant_pattern"),
-          label = "Provide a contaminant pattern",
-          placeholder = "e.g., CRAP"
-        ),
-        actionButton(ns("action_contaminant_summarize"),
-          label = "Evaluate contaminant pattern"
-        )
-      ),
-      
-      box(
-        title = "Contamination statistics",
-        status = "info",
-        id = ns("box_contamination_statistics"),
-        collapsed = TRUE,
-        width = 12,
-        reactableOutput(ns("table_summary_contamination")) %>% withSpinner(type = 8)
-      )
+      HTML(rep("<br>", 34) %>% glue_collapse())
       
     )
   )
@@ -156,7 +132,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           )
         )
         
-      } else if (input$select_data_type == "Skyline" | input$select_data_type == "DIA-NN") {
+      } else if (input$select_data_type == "Skyline" | input$select_data_type == "DIA-NN" | input$select_data_type == "MaxQuant") {
         
         updateSelectInput(session, "select_analyte_type",
           label = "Select an analyte type",
@@ -181,6 +157,13 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           fileInput("tab_upload_data-upload_table",
             label = "Upload a ProteomeDiscoverer search file (.xlsx)",
             accept = c(".xlsx")
+          )
+          
+        } else if (input$select_data_type == "MaxQuant") {
+          
+          fileInput("tab_upload_data-upload_table",
+            label = "Upload a MaxQuant search file (.txt)",
+            accept = c(".txt")
           )
           
         } else if (input$select_data_type == "Skyline") {
@@ -212,37 +195,53 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
-      map(
-        .x = c(
-          "box_contaminant_selection",
-          "box_contamination_statistics"
-        ),
-        .f = ~ {if (input$select_analyte_type == "peptides") updateBox(.x, "remove") else updateBox(.x, "restore")}
-      )
+      # map(
+      #   .x = c(
+      #     "box_contaminant_selection",
+      #     "box_contamination_statistics"
+      #   ),
+      #   .f = ~ {if (input$select_analyte_type == "peptides") updateBox(.x, "remove") else updateBox(.x, "restore")}
+      # )
+      
+      
+      if (input$select_analyte_type == "peptides") {
+        shinyjs::hide(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
+      } else {
+        shinyjs::show(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
+      }
       
     })
     
     
     set_tp <- eventReactive(input$action_upload_table, {
       
-      renamed_files <- input$upload_table %>% 
-        rename_uploaded_file()
+      tryCatch({
       
-      tp(
-        tidyproteomics::import(
-          files = renamed_files$datapath,
-          platform = input$select_data_type,
-          analyte = input$select_analyte_type
+        renamed_files <- input$upload_table %>% 
+          rename_uploaded_file()
+        
+        tp(
+          tidyproteomics::import(
+            files = renamed_files$datapath,
+            platform = input$select_data_type,
+            analyte = input$select_analyte_type
+          )
         )
+        
+        # Reset subsetted and normalized objects upon upload of new data
+        tp_subset(NULL)
+        tp_normalized(NULL)
+        tp_expression(NULL)
+        tp_enrichment(NULL)
+        
+        tp()
+        
+      },
+        error = function(e) {
+          return("Failed to import table. Please verify the platform and analyte type match those of the table.")
+        }
       )
-      
-      # Reset subsetted and normalized objects upon upload of new data
-      tp_subset(NULL)
-      tp_normalized(NULL)
-      tp_expression(NULL)
-      tp_enrichment(NULL)
-      
-      tp()
+        
       
     })
     
@@ -250,15 +249,16 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     output$text_tidyproteomics_summary <- renderUI({
       
       shiny::req(set_tp())
+      
+      validate(
+        need(!is.character(set_tp()), set_tp())
+      )
 
       isolate({
         
         map(
           .x = c(
-            # "box_tidyproteomics_object_summary"
-            "box_summary_table_selection",
-            "box_contaminant_selection",
-            "box_data_feature_selection"
+            "tabbox_data_summary_box"
           ),
           .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
         )
@@ -268,45 +268,6 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
       })
 
     })
-    
-    
-    observeEvent(input$action_summarize, {
-      
-      map(
-        .x = c(
-          "box_summary_statistics"
-        ),
-        .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
-      )
-      
-    })
-    
-    
-    observeEvent(input$action_contaminant_summarize, {
-      
-      map(
-        .x = c(
-          "box_contamination_statistics"
-        ),
-        .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
-      )
-      
-    })
-    
-    
-    observeEvent(input$action_view_feature, {
-      
-      map(
-        .x = c(
-          "box_data_feature_viewer"
-        ),
-        .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
-      )
-      
-    })
-    
-    
-    
     
     
     observeEvent(tp(), {
@@ -326,7 +287,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     output$table_data_feature <- reactable::renderReactable({
       
-      input$action_view_feature
+      shiny::req(input$action_view_feature)
       
       isolate({
         
@@ -342,7 +303,8 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
             resizable = TRUE,
             defaultColDef = colDef(
               sortNALast = TRUE
-            )
+            ),
+            columns = build_summary_col_defs(.)
           )
         
       })
@@ -352,7 +314,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     output$table_summary_sample <- reactable::renderReactable({
       
-      input$action_summarize
+      shiny::req(input$action_summarize)
       
       isolate({
       
@@ -366,18 +328,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
             searchable = TRUE,
             highlight = TRUE,
             resizable = TRUE,
-            columns = list(
-              CVs = colDef(
-                cell = JS("function(cellInfo, state) {
-                    if (cellInfo.value != null) {
-                      return cellInfo.value.toFixed(3)
-                    } else {
-                      return cellInfo.value
-                    }
-                  }"
-                )
-              )
-            )
+            columns = build_summary_col_defs(.)
           )
         
       })
@@ -388,7 +339,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     output$table_summary_contamination <- reactable::renderReactable({
       
-      input$action_contaminant_summarize
+      shiny::req(input$action_contaminant_summarize)
       
       isolate({
         
@@ -404,11 +355,13 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
             filterable = TRUE,
             searchable = TRUE,
             highlight = TRUE,
-            resizable = TRUE
+            resizable = TRUE,
+            columns = build_summary_col_defs(.)
           )
       })
       
     })
     
   })
+  
 }

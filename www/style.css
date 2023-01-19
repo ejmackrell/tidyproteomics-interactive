@@ -187,5 +187,13 @@ label:not(.form-check-label):not(.custom-file-label) {
   border-radius: 0% !important;
 }
 
+.card.card-outline-tabs .card-header .nav-item .nav-link {
+    border-left: 1px solid #dee2e6;
+    margin-left: 0;
+    padding-left: 12px; 
+    padding-right: 12px; 
+    font-size: medium;
+    padding-top: 5px;
+}
 
 

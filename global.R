@@ -28,7 +28,7 @@ source("modules/tab_introduction.R")
 options(
   spinner.size = 0.75,
   spinner.color = "#5e8cbe7a",
-  shiny.maxRequestSize = 30 * 1024^2,
+  shiny.maxRequestSize = 500 * 1024^2,
   cli.progress_show_after = 0
 )
 
@@ -43,6 +43,45 @@ rename_uploaded_file <- function(x) {
   
   x$datapath <- new
   x
+  
+}
+
+
+build_summary_col_defs <- function(x) {
+  
+  col_def <- list()
+  
+  if ("CVs" %in% names(x)) {
+    col_def <- col_def %>% 
+      append(
+        list(
+          CVs = colDef(
+            cell = JS("function(cellInfo, state) {
+                          if (cellInfo.value != null) {
+                            return cellInfo.value.toFixed(3)
+                          } else {
+                            return cellInfo.value
+                          }
+                        }"
+            )
+          )
+        )
+    )
+  }
+  
+  if ("import_file" %in% names(x)) {
+    
+    col_def <- col_def %>% 
+      append(
+        list(
+          import_file = colDef(
+            minWidth = 400
+          )
+        )
+      )
+  }
+  
+  return(col_def)
   
 }
 

@@ -7,7 +7,6 @@ ui <- dashboardPage(
   header = dashboardHeader(
     title = dashboardBrand(
       title = "tidyproteomics",
-      # href = "https://github.com/jeffsocal/tidyproteomics",
       href = "https://jeffsocal.github.io/tidyproteomics/",
       color = "primary",
       image = "logo.png"

@@ -167,6 +167,14 @@ tab_expression_analysis_ui <- function(id) {
           easyClose = FALSE,
           background = "#e9e9e9",
           fluidRow(
+            column(12,
+              awesomeCheckbox(ns("checkbox_table_detailed"),
+                label = "Display all quantitative information?",
+                value = FALSE
+              )
+            )
+          ),
+          fluidRow(
             column(6,
               awesomeCheckbox(ns("checkbox_table_filter_p_values"),
                 label = "Filter by adjusted p-value?",
@@ -545,6 +553,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
           tp_expression_analysis_annotated_filtered()
           
         }} %>% 
+        {
+          if (!input$checkbox_table_detailed) relocate(select(., -n, -foldchange, -limma_t_statistic, -limma_B_statistic), c("average_expression", "proportional_expression"), .after = "adj_p_value") else .
+        } %>% 
           reactable(
             sortable = TRUE,
             highlight = TRUE,
@@ -564,6 +575,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
               ),
               description = colDef(
                 minWidth = 300
+              ),
+              log2_foldchange = colDef(
+                minWidth = 120
               )
             )
           )
