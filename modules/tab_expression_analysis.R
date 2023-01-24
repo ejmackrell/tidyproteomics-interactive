@@ -154,6 +154,7 @@ tab_expression_analysis_ui <- function(id) {
         id = ns("box_table_differential_expression"),
         width = 12,
         collapsed = TRUE,
+        br(),
         actionButton(ns("table_download"), 
           label = "Download table",
           icon = icon("download")
@@ -537,6 +538,8 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
 
       shiny::req(set_tp_expression())
       input$action_filter_table
+      
+      # browser()
 
       isolate({
 
@@ -554,7 +557,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
           
         }} %>% 
         {
-          if (!input$checkbox_table_detailed) relocate(select(., -n, -foldchange, -limma_t_statistic, -limma_B_statistic), c("average_expression", "proportional_expression"), .after = "adj_p_value") else .
+          if (!input$checkbox_table_detailed) relocate(select(., -n, -foldchange, -contains("statistic")), c("average_expression", "proportional_expression"), .after = "adj_p_value") else .
         } %>% 
           reactable(
             sortable = TRUE,
