@@ -59,6 +59,14 @@ tab_subset_ui <- function(id) {
           width = "300px"
         ),
         br(),
+        
+        awesomeCheckbox(ns("checkbox_reassign"),
+          label = "Reassign sample groups?",
+          value = FALSE
+        ),
+        rhandsontable::rHandsontableOutput(ns("table_reassign_samples")),
+        br(),
+        
         shinyjs::disabled(
           actionButton(ns("action_subset"),
             label = "Subset data"
@@ -144,9 +152,9 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     observeEvent(input$checkbox_enable_subsetting, {
       
       if (input$checkbox_enable_subsetting) {
-        shinyjs::show("group_subsetting_parameters")
+        shinyjs::enable("group_subsetting_parameters")
       } else {
-        shinyjs::hide("group_subsetting_parameters")
+        shinyjs::disable("group_subsetting_parameters")
       }
       
     })
@@ -155,10 +163,21 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     observeEvent(input$checkbox_subset_contamination, {
       
       if (input$checkbox_subset_contamination) {
-        shinyjs::show("text_contaminant_pattern")
+        shinyjs::enable("text_contaminant_pattern")
       } else {
-        shinyjs::hide("text_contaminant_pattern")
+        shinyjs::disable("text_contaminant_pattern")
       }
+      
+    })
+    
+    observeEvent(input$checkbox_reassign, {
+      
+      if (input$checkbox_reassign) {
+        shinyjs::enable("table_reassign_samples")
+      } else {
+        shinyjs::disable("table_reassign_samples")
+      }
+      
       
     })
     
@@ -186,6 +205,28 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
           ) %>% unlist()
         ) %>% 
         mutate(id = row_number())
+      
+    })
+    
+    
+    output$table_reassign_samples <- renderRHandsontable({
+      
+      shiny::req(tp())
+      
+      isolate({
+        
+        rhandsontable(
+          data = tp() %>% 
+            pluck("experiments") %>% 
+            select(sample_id, sample_file, sample) %>% 
+            mutate(new_sample_name = "")
+        ) %>% 
+          hot_col(c("sample_id", "sample_file", "sample"),
+            readOnly = TRUE
+          )
+        
+      })
+      
       
     })
     
@@ -283,9 +324,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
         filter(id == input$select_subsetting_variable) %>%
         pull(type)
 
-      # browser()
-
       shiny::req(subset_variable_type)
+      shiny::req(input$table_reassign_samples$data)
 
 
       if(
@@ -299,8 +339,21 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
           input$text_contaminant_pattern == ""
         } |
         {
+          
+          input$checkbox_reassign &
+          "" %in% {input$table_reassign_samples$data %>% 
+              map_df(
+                .f = ~ tibble::as_tibble(.x, 
+                  .name_repair = ~{input$table_reassign_samples$params$rColnames %>% 
+                      as.character()}
+                )
+              ) %>% 
+              pull(new_sample_name)}
+        } |
+        {
           !input$checkbox_enable_subsetting &
-          !input$checkbox_subset_contamination
+          !input$checkbox_subset_contamination &
+          !input$checkbox_reassign
         }
       ) shinyjs::disable("action_subset") else shinyjs::enable("action_subset")
 
@@ -309,34 +362,32 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
     })
 
-
-
-    observeEvent(input$text_subsetting_value, {
-
-      if (input$text_subsetting_value == "") {
-
+    
+    observe({
+      
+      
+      if (input$checkbox_enable_subsetting & input$text_subsetting_value == "") {
+        
         showFeedbackWarning("text_subsetting_value", text = NULL, icon = NULL)
-
+        
       } else {
-
+        
         hideFeedback("text_subsetting_value")
-
+        
       }
-
-    })
-
-    observeEvent(input$text_contaminant_pattern, {
-
-      if (input$text_contaminant_pattern == "") {
-
+      
+      
+      if (input$checkbox_subset_contamination & input$text_contaminant_pattern == "") {
+        
         showFeedbackWarning("text_contaminant_pattern", text = NULL, icon = NULL)
-
+        
       } else {
-
+        
         hideFeedback("text_contaminant_pattern")
-
+        
       }
-
+      
+      
     })
 
 
@@ -350,10 +401,35 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
         filter(id == input$select_subsetting_variable) %>%
         pull(type)
 
-      # browser()
-
       tp_subset(
         tp() %>%
+          {
+            
+            if (input$checkbox_reassign) {
+              
+              df_sample_names <- input$table_reassign_samples$data %>% 
+                map_df(
+                  .f = ~ tibble::as_tibble(.x, 
+                    .name_repair = ~ {input$table_reassign_samples$params$rColnames %>% 
+                        as.character()}
+                  )
+                ) 
+              
+              tp() %>% 
+                reduce2(
+                  .x = df_sample_names$sample_id,
+                  .y = df_sample_names$new_sample_name,
+                  .f = ~ reassign(.x, 
+                    field = "sample_id",
+                    pattern = ..2,
+                    replace = ..3
+                  ),
+                  .init = .
+                )
+              
+            } else .
+            
+          } %>% 
           {
             if (input$checkbox_enable_subsetting) {
 
@@ -474,8 +550,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
         shiny::req(set_tp_subset())
 
-        # browser()
-
         tp_subset() %>%
           summary(
             contamination = input$text_subsetted_contaminant_pattern,
@@ -506,11 +580,11 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
         setNames(subsetting_operations, c("subset", "contamination"))
 
-      } else if (input$checkbox_enable_subsetting) {
+      } else if (input$checkbox_enable_subsetting & length(subsetting_operations) == 1) {
 
         setNames(subsetting_operations, "subset")
 
-      } else if (input$checkbox_subset_contamination) {
+      } else if (input$checkbox_subset_contamination & length(subsetting_operations) == 1) {
 
         setNames(subsetting_operations, "contamination")
 
@@ -524,8 +598,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     output$contamination_output <- renderUI({
 
       shiny::req(tp())
-
-      # browser()
 
       if (!is.null(tp_subset())) {
 
@@ -542,12 +614,9 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
       } else {
 
-        # HTML('<span style="font-weight:400;font-size:1rem;margin-left:7px;border-left: black;border-left-width: thin;border-left-style: solid;padding-left: 7px;float: right;">subsetted: false</span>')
         HTML('<span class="footer-information-warning">contamination removed: false</span>')
 
       }
-
-      # HTML('<span style="font-weight:400;font-size:1rem;margin-left:7px;border-left: black;border-left-width: thin;border-left-style: none;padding-left: 7px;float: right;">contamination removal: true</span>')
 
     })
 
@@ -555,8 +624,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     output$subset_output <- renderUI({
 
       shiny::req(tp())
-
-      # browser()
 
       if (!is.null(tp_subset())) {
 
@@ -573,7 +640,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
       } else {
 
-          # HTML('<span style="font-weight:400;font-size:1rem;margin-left:7px;border-left: black;border-left-width: thin;border-left-style: solid;padding-left: 7px;float: right;">subsetted: false</span>')
           HTML('<span class="footer-information-warning">subsetted: false</span>')
 
       }

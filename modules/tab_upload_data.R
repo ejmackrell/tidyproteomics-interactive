@@ -122,7 +122,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     observeEvent(input$select_data_type, {
       
-      if (input$select_data_type == "ProteomeDiscoverer") {
+      if (input$select_data_type == "ProteomeDiscoverer" | input$select_data_type == "MaxQuant") {
         
         updateSelectInput(session, "select_analyte_type",
           label = "Select an analyte type",
@@ -132,7 +132,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           )
         )
         
-      } else if (input$select_data_type == "Skyline" | input$select_data_type == "DIA-NN" | input$select_data_type == "MaxQuant") {
+      } else if (input$select_data_type == "Skyline" | input$select_data_type == "DIA-NN") {
         
         updateSelectInput(session, "select_analyte_type",
           label = "Select an analyte type",

@@ -1795,6 +1795,18 @@
         "stringr"
       ]
     },
+    "rhandsontable": {
+      "Package": "rhandsontable",
+      "Version": "0.3.8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "cc9b9fd1376181e84c88621711454676",
+      "Requirements": [
+        "htmlwidgets",
+        "jsonlite",
+        "magrittr"
+      ]
+    },
     "rjson": {
       "Package": "rjson",
       "Version": "0.2.21",
@@ -2203,15 +2215,15 @@
     },
     "tidyproteomics": {
       "Package": "tidyproteomics",
-      "Version": "1.0.5",
+      "Version": "1.1.2",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "jeffsocal",
       "RemoteRepo": "tidyproteomics",
-      "RemoteRef": "main",
-      "RemoteSha": "0f1e42f12c59b7b590b585faa49b54bcaa43d468",
-      "Hash": "cd16550bc1f2f74dd95ec3440c5b0a4f",
+      "RemoteRef": "6d83d19876544a69dd4601ee882453ceaae74f0a",
+      "RemoteSha": "6d83d19876544a69dd4601ee882453ceaae74f0a",
+      "Hash": "c49aba61845ba48b0844b886edf1a9c9",
       "Requirements": [
         "Biostrings",
         "cli",

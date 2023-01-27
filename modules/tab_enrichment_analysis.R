@@ -108,7 +108,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         
         updateSelectInput(session, "select_ontology",
           choices = NULL,
-          label = "Please upload a dataset to use this feature."
+          label = "Please upload a dataset containing ontology annotations to use this feature."
         )
         
         shinyjs::disable("select_ontology")

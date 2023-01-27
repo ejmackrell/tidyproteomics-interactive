@@ -192,8 +192,6 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     
     set_tp_normalized <- eventReactive(input$action_normalize, {
       
-      # browser()
-      
       tp_normalized(
         
         {if (!is.null(tp_subset())) tp_subset() else tp()} %>% 
@@ -363,16 +361,22 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
       tp_normalized()
       
       isolate({
-        
-        # browser()
       
         if (!is.null(tp())) {
         
           if (!is.null(tp_normalized()$quantitative_source)) {
             
+            if (input$checkbox_impute) {
             
-            display_normalization_html <- glue('<span style="font-weight:300;font-size:0.75rem;">impute {input$select_imputation_order} normalization</span>')
-            HTML(glue('<span class="footer-information">normalized: {tp_normalized()$quantitative_source}<br>{display_normalization_html}</span>'))
+              display_normalization_html <- glue('<span style="font-weight:300;font-size:0.75rem;">impute {input$select_imputation_order} normalization</span>')
+              HTML(glue('<span class="footer-information">normalized: {tp_normalized()$quantitative_source}<br>{display_normalization_html}</span>'))
+              
+            } else {
+              
+              display_normalization_html <- glue('<span style="font-weight:300;font-size:0.75rem;">no imputation</span>')
+              HTML(glue('<span class="footer-information">normalized: {tp_normalized()$quantitative_source}<br>{display_normalization_html}</span>'))
+              
+            }
             
           } else {
             

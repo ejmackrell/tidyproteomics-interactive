@@ -196,4 +196,7 @@ label:not(.form-check-label):not(.custom-file-label) {
     padding-top: 5px;
 }
 
+.rhandsontable[disabled="disabled"] {
+  opacity: 50% !important;
+}
 

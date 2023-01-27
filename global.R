@@ -7,6 +7,7 @@ library(shinyWidgets)
 library(shinyjs)
 library(shinyFeedback)
 library(tippy)
+library(rhandsontable)
 
 library(dplyr)
 library(magrittr)

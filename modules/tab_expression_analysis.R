@@ -405,6 +405,17 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
         
         tp_expression()
         
+      } else if (!is.null(tp_subset())) {
+        
+        tp_expression(
+          tp_subset() %>% 
+            tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
+              .method = statistical_methods[[input$select_statistical_method]]
+            )
+        )
+        
+        tp_expression()
+        
       } else {
         
         tp_expression(
@@ -423,29 +434,33 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     
     tp_expression_analysis_annotated <- eventReactive(set_tp_expression(), {
       
-      annotation_columns <- tp_expression()$annotation %>% 
-        filter(term %in% c("gene_name", "description")) %>% 
-        distinct(term) %>% 
-        pull() %>% 
-        sort(decreasing = TRUE)
-      
-      map(
-        .x = tp_expression()$analysis, 
-        .f = ~ .x$expression %>% 
-          left_join(
-            y = tp_expression()$annotation %>% 
-              filter(term %in% c("gene_name", "description")) %>%
-              tidyr::pivot_wider(id_cols = "protein", names_from = "term", values_from = "annotation")
-          ) %>% 
-          relocate(contains(annotation_columns), .after = "protein") %>% 
-          {
-            if ("description" %in% colnames(.)) {
-              mutate(., description = {description %>% stringr::str_match(pattern = stringr::regex('^(.*) OS'))}[,2])
-            } else .
-          }
-      )
-      
-      
+      if (!is.null(tp_expression()$annotation)) {
+        
+        annotation_columns <- tp_expression()$annotation %>% 
+          filter(term %in% c("gene_name", "description")) %>% 
+          distinct(term) %>% 
+          pull() %>% 
+          sort(decreasing = TRUE)
+        
+        map(
+          .x = tp_expression()$analysis, 
+          .f = ~ list(
+            expression = .x$expression %>% 
+              left_join(
+                y = tp_expression()$annotation %>% 
+                  filter(term %in% c("gene_name", "description")) %>%
+                  tidyr::pivot_wider(id_cols = "protein", names_from = "term", values_from = "annotation")
+              ) %>% 
+              relocate(contains(annotation_columns), .after = "protein") %>% 
+              {
+                if ("description" %in% colnames(.)) {
+                  mutate(., description = {description %>% stringr::str_match(pattern = stringr::regex('^(.*) OS'))}[,2])
+                } else .
+              }
+            )
+        )
+        
+      } else tp_expression()$analysis
       
     })
     
@@ -456,7 +471,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
       tp_expression_analysis_annotated_filtered(
         tp_expression_analysis_annotated() %>%
-          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
+          pluck(glue("{input$select_group_one}/{input$select_group_two}"), "expression") %>%
           arrange(adj_p_value) %>%
           {
             if (input$checkbox_table_filter_p_values) filter(., data.table::between(.$adj_p_value, input$slider_table_p_value_filter[1], input$slider_table_p_value_filter[2])) else .
@@ -476,12 +491,10 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
       isolate({
         
-        # browser()
-        
         shiny::req(tp_expression()$analysis)
         
         tp_expression_analysis_annotated() %>%
-          pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
+          pluck(glue("{input$select_group_one}/{input$select_group_two}"), "expression") %>%
           plotly::plot_ly(
             type = "scattergl",
             x = ~ isolate(eval(parse_expr(input$select_volcano_x_axis))),
@@ -497,8 +510,8 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
             alpha = input$slider_volcano_marker_alpha,
             hoverinfo = 'text',
             text = glue::glue("accession: {.$protein}
-            {if ('gene_name' %in% colnames(.)) invisible(glue('gene name: {.$gene_name}'))}
-            {if ('description' %in% colnames(.)) invisible(glue('description: {.$description}'))}
+            {if ('gene_name' %in% colnames(.)) invisible(glue('gene name: {.$gene_name}')) else 'gene name: NA'}
+            {if ('description' %in% colnames(.)) invisible(glue('description: {.$description}')) else 'description: NA'}
             log10 average expression: {formatC(.$average_expression, format = 'e', digits = 2)}
             log2FC: {round(.$log2_foldchange, digits = 3)}
             adjusted p-value: {formatC(.$adj_p_value, format = 'e', digits = 2)}
@@ -538,8 +551,6 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
 
       shiny::req(set_tp_expression())
       input$action_filter_table
-      
-      # browser()
 
       isolate({
 
@@ -548,7 +559,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
         {if (is.null(tp_expression_analysis_annotated_filtered())) {
           
           tp_expression_analysis_annotated() %>%
-                pluck(glue("{input$select_group_one}/{input$select_group_two}")) %>%
+                pluck(glue("{input$select_group_one}/{input$select_group_two}"), "expression") %>%
                 arrange(adj_p_value)
           
         } else {

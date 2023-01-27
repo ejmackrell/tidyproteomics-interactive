@@ -66,7 +66,9 @@ tab_introduction_ui <- function(id) {
             "Users may subset their data by any of the qualitative or
             quantitative variables present across the experiments, accounting,
             or annotation attributes of the data set. Users may also specify a
-            text pattern for removing contaminant proteins from their data."
+            text pattern for removing contaminant proteins from their data.
+            Finally, sample groups can also be reassigned or renamed using the
+            interactive spreadsheet."
           ),
           timelineItem(
             title = "Abundance normalization",
