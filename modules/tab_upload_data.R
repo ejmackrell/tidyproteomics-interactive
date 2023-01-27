@@ -195,16 +195,8 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
       
-      # map(
-      #   .x = c(
-      #     "box_contaminant_selection",
-      #     "box_contamination_statistics"
-      #   ),
-      #   .f = ~ {if (input$select_analyte_type == "peptides") updateBox(.x, "remove") else updateBox(.x, "restore")}
-      # )
       
-      
-      if (input$select_analyte_type == "peptides") {
+      if (input$select_analyte_type == "peptides" | input$select_data_type == "MaxQuant") {
         shinyjs::hide(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
       } else {
         shinyjs::show(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")

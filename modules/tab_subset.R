@@ -245,7 +245,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
           )
       )
       
-      if (tp()$analyte == "peptides") {
+      if (tp()$analyte == "peptides" | tp()$origin == "MaxQuant") {
         
         shinyjs::hide(selector = "a[data-value='tab_subset-box_contaminant_selection']")
         
