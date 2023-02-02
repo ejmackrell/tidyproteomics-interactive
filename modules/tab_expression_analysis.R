@@ -158,10 +158,7 @@ tab_expression_analysis_ui <- function(id) {
         actionButton(ns("table_download"), 
           label = "Download table",
           icon = icon("download")
-        ) %>% 
-          shiny::tagAppendAttributes(
-            onclick = glue("Reactable.downloadDataCSV('{ns('table_differential_expression')}', 'expression_analysis.csv')")
-          ),
+        ),
         reactableOutput(ns("table_differential_expression")) %>% withSpinner(type = 8),
         sidebar = boxSidebar(
           id = ns("box_table_differential_expression_sidebar"),
@@ -223,6 +220,8 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
   
   moduleServer(id, function(input, output, session) {
     
+    
+    shinyjs::onclick("table_download", runjs(glue("Reactable.downloadDataCSV('tab_expression_analysis-table_differential_expression', '{input$select_group_one}_vs_{input$select_group_two}_expression_analysis.csv')")))
     
     output$tab_subset_availability <- reactive({  
       

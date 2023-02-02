@@ -50,10 +50,7 @@ tab_enrichment_analysis_ui <- function(id) {
         actionButton(ns("table_download"), 
           label = "Download table",
           icon = icon("download")
-        ) %>% 
-          shiny::tagAppendAttributes(
-            onclick = glue("Reactable.downloadDataCSV('{ns('table_annotation_enrichment')}', 'enrichment_analysis.csv')")
-          ),
+        ),
         reactableOutput(ns("table_annotation_enrichment")) %>% withSpinner(type = 8)
       )
       
@@ -66,6 +63,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
   
   moduleServer(id, function(input, output, session) {
     
+    shinyjs::onclick("table_download", runjs(glue("Reactable.downloadDataCSV('tab_enrichment_analysis-table_annotation_enrichment', '{stringr::str_split(input$select_contrast, '/')[[1]][1]}_vs_{stringr::str_split(input$select_contrast, '/')[[1]][2]}_enrichment_analysis.csv')")))
     
     output$tab_subset_availability <- reactive({  
       
