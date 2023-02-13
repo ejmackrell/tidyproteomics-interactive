@@ -310,6 +310,14 @@
         "sys"
       ]
     },
+    "backports": {
+      "Package": "backports",
+      "Version": "1.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c39fbec8a30d23e721980b8afb31984c",
+      "Requirements": []
+    },
     "base64enc": {
       "Package": "base64enc",
       "Version": "0.1-3",
@@ -367,6 +375,25 @@
       "Repository": "CRAN",
       "Hash": "976cf154dfb043c012d87cddd8bca363",
       "Requirements": []
+    },
+    "broom": {
+      "Package": "broom",
+      "Version": "1.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ab67f5ce0aa79b8db7ddba5cb0d4012d",
+      "Requirements": [
+        "backports",
+        "dplyr",
+        "ellipsis",
+        "generics",
+        "glue",
+        "purrr",
+        "rlang",
+        "stringr",
+        "tibble",
+        "tidyr"
+      ]
     },
     "bs4Dash": {
       "Package": "bs4Dash",
@@ -2215,17 +2242,19 @@
     },
     "tidyproteomics": {
       "Package": "tidyproteomics",
-      "Version": "1.1.2",
+      "Version": "1.2.4",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "jeffsocal",
       "RemoteRepo": "tidyproteomics",
-      "RemoteRef": "6d83d19876544a69dd4601ee882453ceaae74f0a",
-      "RemoteSha": "6d83d19876544a69dd4601ee882453ceaae74f0a",
-      "Hash": "c49aba61845ba48b0844b886edf1a9c9",
+      "RemoteRef": "main",
+      "RemoteSha": "63f027ef596061a9ccbce65a8f5d31403cf45e43",
+      "Hash": "b2d115470b3fd999ab19758feff5dba3",
       "Requirements": [
         "Biostrings",
+        "RColorBrewer",
+        "broom",
         "cli",
         "digest",
         "doParallel",
@@ -2237,7 +2266,6 @@
         "ggplot2",
         "ggrepel",
         "glue",
-        "hexbin",
         "limma",
         "magrittr",
         "missForest",
@@ -2246,12 +2274,13 @@
         "randomForest",
         "readr",
         "readxl",
-        "rfasta",
+        "rlang",
         "scales",
         "stringr",
         "tibble",
         "tidyr",
         "tidyselect",
+        "vroom",
         "writexl"
       ]
     },
