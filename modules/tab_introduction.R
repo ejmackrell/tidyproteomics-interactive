@@ -102,8 +102,19 @@ tab_introduction_ui <- function(id) {
             of terms from the user-specified ontology. Users can specify either the <i>GSEA</i>
             algorithm or a <i>Wilcoxon rank sum</i> comparison for conducting this analysis.") 
           )
-          
+        ),
+        div(style="font-weight:600;",
+          "Copyright © 2023, California Institute of Technology (Caltech),
+          based on support from the Institute for Collaborative
+          Biotechnologies through cooperative agreement W911NF-19-2-0026 from
+          the U.S. Army Research Office.  The content of the information does
+          not necessarily reflect the position or the policy of the
+          Government, and no official endorsement should be inferred.",
+          br(),
+          br(),
+          "All rights reserved."
         )
+        
       )
       
     )
