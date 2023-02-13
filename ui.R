@@ -16,7 +16,7 @@ ui <- dashboardPage(
     fixed = TRUE,
     div(
       style="font-weight:400;font-size:1.25rem;margin-left:7px",
-      "tidyproteomics.interactive"
+      "tidyproteomics-interactive"
     )
   ),
   sidebar = dashboardSidebar(
