@@ -14,7 +14,6 @@ tab_upload_data_ui <- function(id) {
       fluidRow(
         box(
           title = "Table upload",
-          # status = "secondary",
           selectInput(ns("select_data_type"),
             label = "Select a data type",
             choices = list(
@@ -36,7 +35,14 @@ tab_upload_data_ui <- function(id) {
           ),
           br(),
           uiOutput(ns("dynamic_file_input")),
-          br(),
+          div(id = ns("div_example_data"),
+            div(style='text-align:center; font-weight:600;', '—or—'),
+              awesomeCheckbox(ns("checkbox_example_data"),
+                label = "Use example dataset?",
+                value = FALSE
+              ),
+              br()
+          ),
           actionButton(ns("action_upload_table"),
             label = "Import data"
           )
@@ -115,8 +121,43 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     observe({
       
-      if (is.null(input$upload_table)) shinyjs::disable("action_upload_table") else shinyjs::enable("action_upload_table")
+      if (input$select_data_type == "ProteomeDiscoverer" & input$select_analyte_type == "proteins") {
+        
+        shinyjs::show("div_example_data")
+        
+      } else {
+       
+        shinyjs::hide("div_example_data") 
+        
+      }
       
+      if (input$checkbox_example_data) {
+        
+        shinyjs::disable("select_data_type")
+        shinyjs::disable("select_analyte_type")
+        shinyjs::disable("dynamic_file_input")
+        
+      } else {
+        
+        shinyjs::enable("select_data_type")
+        shinyjs::enable("select_analyte_type")
+        shinyjs::enable("dynamic_file_input")
+        
+      }
+      
+    })
+    
+    observe({
+      
+      if (!input$checkbox_example_data) {
+        
+        if (is.null(input$upload_table)) shinyjs::disable("action_upload_table") else shinyjs::enable("action_upload_table")
+        
+      } else {
+        
+        shinyjs::enable("action_upload_table") 
+        
+      }
     })
     
     
@@ -208,25 +249,43 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     set_tp <- eventReactive(input$action_upload_table, {
       
       tryCatch({
+        
+        if (!input$checkbox_example_data) {
       
-        renamed_files <- input$upload_table %>% 
-          rename_uploaded_file()
-        
-        tp(
-          tidyproteomics::import(
-            files = renamed_files$datapath,
-            platform = input$select_data_type,
-            analyte = input$select_analyte_type
+          renamed_files <- input$upload_table %>% 
+            rename_uploaded_file()
+          
+          tp(
+            tidyproteomics::import(
+              files = renamed_files$datapath,
+              platform = input$select_data_type,
+              analyte = input$select_analyte_type
+            )
           )
-        )
-        
-        # Reset subsetted and normalized objects upon upload of new data
-        tp_subset(NULL)
-        tp_normalized(NULL)
-        tp_expression(NULL)
-        tp_enrichment(NULL)
-        
-        tp()
+          
+          # Reset subsetted and normalized objects upon upload of new data
+          tp_subset(NULL)
+          tp_normalized(NULL)
+          tp_expression(NULL)
+          tp_enrichment(NULL)
+          
+          tp()
+          
+        } else {
+          
+          tp(
+            hela_proteins
+          )
+          
+          # Reset subsetted and normalized objects upon upload of new data
+          tp_subset(NULL)
+          tp_normalized(NULL)
+          tp_expression(NULL)
+          tp_enrichment(NULL)
+          
+          tp()
+          
+        }
         
       },
         error = function(e) {

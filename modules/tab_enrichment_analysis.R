@@ -76,7 +76,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     
     observe({
       
-      if (is.null(tp_expression()$analysis %>% names()) | is.null(input$select_ontology)) {
+      if (is.null(tp_expression()$analysis %>% names()) | input$select_ontology == '') {
         
         shinyjs::disable("action_enrichment")
         
@@ -102,23 +102,8 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
          
       }
       
-      if (input$select_ontology == '') {
-        
-        updateSelectInput(session, "select_ontology",
-          choices = NULL,
-          label = "Please upload a dataset containing ontology annotations to use this feature."
-        )
-        
-        shinyjs::disable("select_ontology")
-        
-      } else {
-        
-        shinyjs::enable("select_ontology")
-        
-      }
-      
-      
     })
+    
     
     observeEvent(tp(), {
       
@@ -138,7 +123,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         
         updateSelectInput(session, "select_ontology",
           label = "No annotations were provided in the uploaded data",
-          choices = NULL
+          choices = ''
         )
         
         shinyjs::disable("select_ontology")
