@@ -18,7 +18,7 @@ tab_enrichment_analysis_ui <- function(id) {
           label = "Select an existing comparison",
           choices = NULL
         ),
-        selectInput(ns("select_ontology"),
+        selectizeInput(ns("select_ontology"),
           label = "Select ontology for annotation enrichment",
           choices = NULL
         ),
@@ -121,12 +121,13 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         
       } else {
         
-        updateSelectInput(session, "select_ontology",
+        updateSelectizeInput(session, "select_ontology",
           label = "No annotations were provided in the uploaded data",
           choices = ''
         )
         
         shinyjs::disable("select_ontology")
+        shinyjs::disable("action_enrichment")
         
       }
       
