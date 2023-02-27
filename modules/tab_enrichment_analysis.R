@@ -182,7 +182,15 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
         
         tp_enrichment() %>% 
           plot_enrichment(!!input$select_contrast, .term = input$select_ontology) %>% 
-          ggplotly()
+          ggplotly() %>% 
+          layout(
+            title = list(
+              text = glue("{stringr::str_split(input$select_contrast, '/')[[1]][1]} vs. {stringr::str_split(input$select_contrast, '/')[[1]][2]}")
+            ),
+            font = list(
+              size = 12
+            )
+          )
         
       })
       
