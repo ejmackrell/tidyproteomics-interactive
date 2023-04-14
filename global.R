@@ -26,6 +26,7 @@ source("modules/tab_expression_analysis.R")
 source("modules/tab_enrichment_analysis.R")
 source("modules/tab_introduction.R")
 
+# Options for shinycssloaders, file upload limit, cli progress rendering
 options(
   spinner.size = 0.75,
   spinner.color = "#5e8cbe7a",
@@ -33,9 +34,11 @@ options(
   cli.progress_show_after = 0
 )
 
+# Make cli progress human readable in Shiny notifications
 Sys.setenv(NO_COLOR = 1)
   
 
+# Overwrite default behavior of renaming uploaded file
 rename_uploaded_file <- function(x) {
   
   old <- x$datapath
@@ -48,6 +51,7 @@ rename_uploaded_file <- function(x) {
 }
 
 
+# Column rendering definitions for summary table
 build_summary_col_defs <- function(x) {
   
   col_def <- list()
@@ -86,15 +90,16 @@ build_summary_col_defs <- function(x) {
   
 }
 
+
+# Available imputation methods
 imputation_methods <- list(
   "min" = base::min,
   "median" = stats::median,
   "randomforest" = "randomforest"
-  # "mean" = base::mean,
-  # "max" = base::max,
-  # "sum" = base::sum
 )
 
+
+# Available statistical methods for expression comparison
 statistical_methods <- list(
   "t-test" = stats::t.test,
   "Wilcoxon test" = stats::wilcox.test,
@@ -102,6 +107,8 @@ statistical_methods <- list(
   "limma" = "limma"
 )
 
+
+# JS rendering of expression table
 render_expression_reactable <- JS("function(cellInfo, state) {
   
     const fixed_cols = ['imputed', 'log2_foldchange', 'foldchange', 'limma_t_statistic', 'limma_B_statistic']
@@ -133,6 +140,7 @@ render_expression_reactable <- JS("function(cellInfo, state) {
 )
 
 
+# JS rendering of enrichment table
 render_enrichment_reactable <- JS("function(cellInfo, state) {
   
     const fixed_cols = ['enrichment', 'enrichment_normalized', 'log2err']
@@ -163,6 +171,8 @@ render_enrichment_reactable <- JS("function(cellInfo, state) {
   }"
 )
 
+
+# Comparison operators given subsetting data variable type
 subsetting_operators <- list(
   "character" = list(
     "%like%",
@@ -184,6 +194,7 @@ subsetting_operators <- list(
   )
 )
 
+# Data features appropriate for display in table
 tabular_data_features <- c(
   "experiments",
   "quantitative",
@@ -192,6 +203,8 @@ tabular_data_features <- c(
 )
 
 
+# Modified from https://github.com/jeffsocal/tidyproteomics/blob/main/R/plot_pca.R
+# Modify PCA plot function from tidyproteomics for Plotly glyph compatibility
 plot_pca_mod <- function (data = NULL, variables = c("PC1", "PC2"), labels = TRUE, 
   label_size = 3, ...) 
 {

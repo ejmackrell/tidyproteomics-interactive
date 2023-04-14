@@ -220,9 +220,11 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
   
   moduleServer(id, function(input, output, session) {
     
-    
+    # Callback to download DEG table
     shinyjs::onclick("table_download", runjs(glue("Reactable.downloadDataCSV('tab_expression_analysis-table_differential_expression', '{input$select_group_one}_vs_{input$select_group_two}_expression_analysis.csv')")))
     
+    
+    # Disable expression tab when data are null or peptides
     output$tab_subset_availability <- reactive({  
       
       if (is.null(tp())) FALSE else if (tp()$analyte == "peptides") FALSE else TRUE
@@ -232,6 +234,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     outputOptions(output, "tab_subset_availability", suspendWhenHidden = FALSE)
     
     
+    # Disable expression analysis if single sample group available or data are null
     observe({
       
       if (is.null(tp()) | {input$select_group_one == input$select_group_two}) shinyjs::disable("action_expression_analysis") else shinyjs::enable("action_expression_analysis")
@@ -239,9 +242,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
-    
+    # Instantiate reactive for holding sample groups
     experiments <- reactiveVal(NULL)
-
+    
     observeEvent(tp(), {
       
       if (!setequal(experiments(), tp()$experiments$sample)) experiments(tp()$experiments$sample %>% unique())
@@ -249,6 +252,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    # Reset plotting options for new data; reveal volcano and DEG table upon input
     observeEvent(input$action_expression_analysis, {
       
       map(
@@ -274,6 +278,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     }, priority = 1)
     
     
+    # Disable plotting features when deselected by user
     observe({
       
       if (input$select_volcano_color == "fixed") shinyjs::show("pick_volcano_color") else shinyjs::hide("pick_volcano_color")
@@ -309,6 +314,8 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    # Update group choices if data object changes
+    # Disable analysis if only one group is available
     observeEvent(experiments(), {
       
       if (length(experiments()) > 1) {
@@ -364,6 +371,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    # Allow control over raw vs. pre-processed data usage if both are available
     observe({
       
       if (!is.null(tp_normalized()) & length(experiments()) > 1) {
@@ -388,7 +396,8 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
     })
     
-
+    
+    # Set expression object with current tp or subsetted (pre-processed) tp object
     set_tp_expression <- eventReactive(input$action_expression_analysis, {
       
       tp_expression_analysis_annotated_filtered(NULL)
@@ -431,6 +440,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    # Merge annotations into DEG table if they are available
     tp_expression_analysis_annotated <- eventReactive(set_tp_expression(), {
       
       if (!is.null(tp_expression()$annotation)) {
@@ -464,6 +474,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    # Instantiate reactive for holding filtered annotation table
     tp_expression_analysis_annotated_filtered <- reactiveVal(NULL)
     
     observeEvent(input$action_filter_table, {
@@ -483,6 +494,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
+    # Render volcano plot
     output$plot_volcano_plot <- renderPlotly({
       
       shiny::req(set_tp_expression())
@@ -545,7 +557,8 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
     })
 
-
+    
+    # Render DEG table
     output$table_differential_expression <- reactable::renderReactable({
 
       shiny::req(set_tp_expression())

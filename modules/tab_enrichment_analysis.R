@@ -59,12 +59,16 @@ tab_enrichment_analysis_ui <- function(id) {
   
 }
 
+
 tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment) {
   
   moduleServer(id, function(input, output, session) {
     
+    # Callback for downloading enrichment table
     shinyjs::onclick("table_download", runjs(glue("Reactable.downloadDataCSV('tab_enrichment_analysis-table_annotation_enrichment', '{stringr::str_split(input$select_contrast, '/')[[1]][1]}_vs_{stringr::str_split(input$select_contrast, '/')[[1]][2]}_enrichment_analysis.csv')")))
     
+    
+    # Hide enrichment tab when expression data are not available
     output$tab_subset_availability <- reactive({  
       
       if (is.null(tp_expression())) FALSE else TRUE
@@ -74,6 +78,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     outputOptions(output, "tab_subset_availability", suspendWhenHidden = FALSE)
     
     
+    # Disable enrichment if no expression analysis available
     observe({
       
       if (is.null(tp_expression()$analysis %>% names()) | input$select_ontology == '') {
@@ -105,6 +110,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     })
     
     
+    # Disable enrichment if no ontology information available
     observeEvent(tp(), {
       
       if (!is.null(tp()$annotations)) {
@@ -134,6 +140,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     })
     
     
+    # Update contrast selection choice
     observeEvent(tp_expression(), {
       
       updateSelectInput(session, "select_contrast",
@@ -146,6 +153,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     
     observeEvent(input$action_enrichment, {
       
+      # Toggle enrichment output boxes upon input
       map(
         .x = c(
           "box_annotation_enrichment_plot",
@@ -157,6 +165,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     })
     
     
+    # Set enrichment object with current expression object
     set_tp_enrichment <- eventReactive(input$action_enrichment, {
       
       tp_enrichment(
@@ -172,6 +181,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     })
     
     
+    # Render annotation enrichment plot
     output$plotly_annotation_enrichment <- renderPlotly({
       
       shiny::req(set_tp_enrichment())
@@ -197,6 +207,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
     })
     
     
+    # Render annotation enrichment table
     output$table_annotation_enrichment <- renderReactable({
       
       shiny::req(set_tp_enrichment())

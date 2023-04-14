@@ -2242,15 +2242,15 @@
     },
     "tidyproteomics": {
       "Package": "tidyproteomics",
-      "Version": "1.2.4",
+      "Version": "1.3.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "jeffsocal",
       "RemoteRepo": "tidyproteomics",
       "RemoteRef": "main",
-      "RemoteSha": "63f027ef596061a9ccbce65a8f5d31403cf45e43",
-      "Hash": "b2d115470b3fd999ab19758feff5dba3",
+      "RemoteSha": "d7383b7a8798fe30a1981180a23a5d7fb5863a9d",
+      "Hash": "0f0fd26a49d7bdb2e0fae0fe445583a6",
       "Requirements": [
         "Biostrings",
         "RColorBrewer",

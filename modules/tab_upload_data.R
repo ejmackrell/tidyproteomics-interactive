@@ -121,6 +121,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     observe({
       
+      # Example dataset for PD protein-level selection
       if (input$select_data_type == "ProteomeDiscoverer" & input$select_analyte_type == "proteins") {
         
         shinyjs::show("div_example_data")
@@ -131,6 +132,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
         
       }
       
+      # Disable dataset selection fields if example dataset is used
       if (input$checkbox_example_data) {
         
         shinyjs::disable("select_data_type")
@@ -149,6 +151,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     observe({
       
+      # Disable data upload if example dataset is used
       if (!input$checkbox_example_data) {
         
         if (is.null(input$upload_table)) shinyjs::disable("action_upload_table") else shinyjs::enable("action_upload_table")
@@ -158,11 +161,13 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
         shinyjs::enable("action_upload_table") 
         
       }
+      
     })
     
     
     observeEvent(input$select_data_type, {
       
+      # Disable protein/peptide field selection choices for certain platform choices
       if (input$select_data_type == "ProteomeDiscoverer" | input$select_data_type == "MaxQuant") {
         
         updateSelectInput(session, "select_analyte_type",
@@ -191,6 +196,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
       
       input$select_data_type
       
+      # Render file upload in platform-dependent fashion
       isolate({
       
         if (input$select_data_type == "ProteomeDiscoverer") {
@@ -227,8 +233,10 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
       
     })
     
+    
     observeEvent(input$action_upload_table, {
       
+      # Activate tidyproteomics object summary box after data is provided
       map(
         .x = c(
           "box_tidyproteomics_object_summary"
@@ -237,6 +245,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
       )
       
       
+      # Remove contaminant selection for MQ
       if (input$select_analyte_type == "peptides" | input$select_data_type == "MaxQuant") {
         shinyjs::hide(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
       } else {
@@ -248,6 +257,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     set_tp <- eventReactive(input$action_upload_table, {
       
+      # Attempt data upload
       tryCatch({
         
         if (!input$checkbox_example_data) {
@@ -307,6 +317,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
 
       isolate({
         
+        # Toggle data summarization box
         map(
           .x = c(
             "tabbox_data_summary_box"
@@ -314,6 +325,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
         )
         
+        # Print tidyproteomics object summary
         HTML(paste0("<pre style='padding: 0rem; margin-bottom: 0rem; overflow: hidden;'>", capture.output(tp()), "</pre>"))
         
       })
@@ -323,6 +335,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     
     observeEvent(tp(), {
       
+      # Update summary variables with available values from tp object
       updateSelectInput(session, "select_summary_table",
         label = "Select a summary variable",
         choices = tidyproteomics:::get_variables(tp())
@@ -336,6 +349,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     })
     
     
+    # Render data feature table upon selection
     output$table_data_feature <- reactable::renderReactable({
       
       shiny::req(input$action_view_feature)
@@ -363,6 +377,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     })
     
     
+    # Render summary feature table upon selection
     output$table_summary_sample <- reactable::renderReactable({
       
       shiny::req(input$action_summarize)
@@ -388,6 +403,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     })
     
     
+    # Render contamination table upon selection
     output$table_summary_contamination <- reactable::renderReactable({
       
       shiny::req(input$action_contaminant_summarize)

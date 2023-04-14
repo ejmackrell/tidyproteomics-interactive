@@ -139,7 +139,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
   
   moduleServer(id, function(input, output, session) {
     
-    
+    # Hide tab when no data is available
     output$tab_subset_availability <- reactive({  
       
       if (is.null(tp())) FALSE else TRUE
@@ -149,6 +149,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     outputOptions(output, "tab_subset_availability", suspendWhenHidden = FALSE)
     
     
+    # Disable subsetting fields if subsetting deselected
     observeEvent(input$checkbox_enable_subsetting, {
       
       if (input$checkbox_enable_subsetting) {
@@ -160,6 +161,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Disable contaminant removal if contaminant removal deselected
     observeEvent(input$checkbox_subset_contamination, {
       
       if (input$checkbox_subset_contamination) {
@@ -170,6 +172,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       
     })
     
+    
+    # Disable sample group reassignment if reassignment deselected
     observeEvent(input$checkbox_reassign, {
       
       if (input$checkbox_reassign) {
@@ -182,6 +186,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Extract all fields that can be used for subsetting the data
     tp_subset_variables <- eventReactive(tp(), {
       
       list(
@@ -209,6 +214,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Render Excel-like table for reassigning sample groups
     output$table_reassign_samples <- renderRHandsontable({
       
       shiny::req(tp())
@@ -233,6 +239,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     
     observeEvent(tp(), {
       
+      # Update subsetting options
       updateSelectInput(session, "select_subsetting_variable",
         label = "Select a variable for subsetting",
         choices = tp_subset_variables() %>% 
@@ -245,6 +252,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
           )
       )
       
+      # Disable contaminant removal option if MQ data
       if (tp()$analyte == "peptides" | tp()$origin == "MaxQuant") {
         
         shinyjs::hide(selector = "a[data-value='tab_subset-box_contaminant_selection']")
@@ -290,6 +298,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       
       shiny::req(tp())
       
+      # Extract type for chosen subsetting variable (quant/qual/logical)
       subset_variable_type <- tp_subset_variables() %>% 
         filter(id == input$select_subsetting_variable) %>% 
         pull(type)
@@ -319,7 +328,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     observe({
 
       shiny::req(tp())
-
+      
+      # Extract type for chosen subsetting variable (quant/qual/logical)
       subset_variable_type <- tp_subset_variables() %>%
         filter(id == input$select_subsetting_variable) %>%
         pull(type)
@@ -327,7 +337,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       shiny::req(subset_variable_type)
       shiny::req(input$table_reassign_samples$data)
 
-
+      # Disable subsetting/contaminant removal/reassignemnt for invalid/incomplete control choices
       if(
         {
           input$checkbox_enable_subsetting &
@@ -365,7 +375,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     
     observe({
       
-      
+      # Render feedback warnings for empty required fields
       if (input$checkbox_enable_subsetting & input$text_subsetting_value == "") {
         
         showFeedbackWarning("text_subsetting_value", text = NULL, icon = NULL)
@@ -392,7 +402,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
 
     set_tp_subset <- eventReactive(input$action_subset, {
-
+      
+      # Extract chosen subsetting variable and its type
       chosen_subset_variable <- tp_subset_variables() %>%
         filter(id == input$select_subsetting_variable) %>%
         pull(value)
@@ -401,6 +412,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
         filter(id == input$select_subsetting_variable) %>%
         pull(type)
 
+      # Reassign sample groups and/or subset and/or remove contaminants from the current tp object
       tp_subset(
         tp() %>%
           {
@@ -462,9 +474,11 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
       tp_subset()
 
     })
-
+    
+    
     observeEvent(input$action_subset, {
       
+      # Toggle tp object summary box after subsetting
       map(
         .x = c(
           "tabbox_data_summary_box"
@@ -476,7 +490,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
 
     observeEvent(set_tp_subset(), {
-
+      
+      # Update summary variable and data feature selection values
       updateSelectInput(session, "select_summary_table",
         label = "Select a summary variable",
         choices = tidyproteomics:::get_variables(tp_subset())
@@ -489,7 +504,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
     })
 
-
+    
+    # Render data feature table
     output$table_data_feature <- reactable::renderReactable({
 
       shiny::req(input$action_view_feature)
@@ -516,7 +532,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
     })
 
-
+    
+    # Render summary table
     output$table_summary_sample <- reactable::renderReactable({
 
       shiny::req(input$action_summarize)
@@ -542,6 +559,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
     })
 
 
+    # Render contaminant table
     output$table_summary_contamination <- reactable::renderReactable({
 
       shiny::req(input$action_contaminant_summarize)
@@ -570,7 +588,7 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
 
 
-
+    # Store operations in reactive for display to user
     subset_statements <- eventReactive(input$action_subset, {
 
       subsetting_operations <- tp_subset()$operations[!{tp_subset()$operations %>% stringr::str_match("subset") %>% is.na()}]
@@ -594,7 +612,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
     })
 
-
+    
+    # Render contamination indicator in footer
     output$contamination_output <- renderUI({
 
       shiny::req(tp())
@@ -620,7 +639,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
 
     })
 
-
+    
+    # Render subsetting indicator in footer
     output$subset_output <- renderUI({
 
       shiny::req(tp())

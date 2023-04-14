@@ -1,6 +1,7 @@
 
 server <- function(input, output, session) {
   
+  # Instantiate reactives for holding tab outputs
   tp <- reactiveVal()
   tp_subset <- reactiveVal()
   tp_normalized <- reactiveVal()

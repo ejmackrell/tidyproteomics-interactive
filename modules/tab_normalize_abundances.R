@@ -121,7 +121,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
   
   moduleServer(id, function(input, output, session) {
     
-    
+    # Hide tab when no data is available
     output$tab_subset_availability <- reactive({  
       
       if (is.null(tp())) FALSE else TRUE
@@ -133,6 +133,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     
     observeEvent(tp(), {
       
+      # Hide clustered heatmap box if peptide data are used
       map(
         .x = c(
           "box_heatmap"
@@ -145,6 +146,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     
     observe({
       
+      # Disable normalization/imputation method selection if null data or inappropriate methods chosen
       if (is.null(tp()) | is.null(input$select_normalization_method)) shinyjs::disable("action_normalize") else shinyjs::enable("action_normalize")
       
       if (input$checkbox_impute == FALSE) {
@@ -177,6 +179,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     
     observeEvent(input$action_normalize, {
       
+      # Expand boxes containing plot outputs upon normalization
       map(
         .x = c(
           "box_normalization_boxplots",
@@ -192,6 +195,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     
     set_tp_normalized <- eventReactive(input$action_normalize, {
       
+      # Set normalized tp object given current tp object
       tp_normalized(
         
         {if (!is.null(tp_subset())) tp_subset() else tp()} %>% 
@@ -233,6 +237,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Render boxplots
     output$plotly_normalization_boxplots <- renderPlotly({
       
       shiny::req(set_tp_normalized())
@@ -254,8 +259,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
-    
-    
+    # Render CVs vs. method plots
     output$plotly_abundance_cvs_and_dynamic_range <- renderPlotly({
       
       shiny::req(set_tp_normalized())
@@ -276,6 +280,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Render CVs + dynamic range hexbin and regression plots
     output$plot_dynamic_range <- renderPlot({
       
       shiny::req(set_tp_normalized())
@@ -290,6 +295,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Render interactive PCA scores plot
     output$plotly_pca <- renderPlotly({
       
       shiny::req(set_tp_normalized())
@@ -313,6 +319,8 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
       
     })
     
+    
+    # Render cumulative variance explained plot
     output$plotly_pca_variation <- renderPlotly({
       
       shiny::req(set_tp_normalized())
@@ -333,6 +341,8 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
       
     })
     
+    
+    # Render clustered heatmap
     output$plot_heatmap <- renderPlot({
       
       shiny::req(set_tp_normalized())
@@ -355,6 +365,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
     })
     
     
+    # Render normalization indicator in footer
     output$normalization_output <- renderUI({
       
       tp()
