@@ -20,7 +20,9 @@ tab_upload_data_ui <- function(id) {
               "Proteome Discoverer" = "ProteomeDiscoverer",
               "Skyline" = "Skyline",
               "DIA-NN" = "DIA-NN",
-              "MaxQuant" = "MaxQuant"
+              "MaxQuant" = "MaxQuant",
+              "mzTab" = "mzTab",
+              "FragPipe" = "FragPipe"
             ),
             width = "300px"
           ),
@@ -168,7 +170,10 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     observeEvent(input$select_data_type, {
       
       # Disable protein/peptide field selection choices for certain platform choices
-      if (input$select_data_type == "ProteomeDiscoverer" | input$select_data_type == "MaxQuant") {
+      if (input$select_data_type == "ProteomeDiscoverer" | 
+          input$select_data_type == "MaxQuant" | 
+          input$select_data_type == "mzTab" | 
+          input$select_data_type == "FragPipe") {
         
         updateSelectInput(session, "select_analyte_type",
           label = "Select an analyte type",
@@ -178,7 +183,8 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           )
         )
         
-      } else if (input$select_data_type == "Skyline" | input$select_data_type == "DIA-NN") {
+      } else if (input$select_data_type == "Skyline" | 
+                 input$select_data_type == "DIA-NN") {
         
         updateSelectInput(session, "select_analyte_type",
           label = "Select an analyte type",
@@ -224,6 +230,20 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           
           fileInput("tab_upload_data-upload_table",
             label = "Upload a DIA-NN search file (.tsv)",
+            accept = c(".tsv")
+          )
+          
+        } else if (input$select_data_type == "mzTab") {
+          
+          fileInput("tab_upload_data-upload_table",
+            label = "Upload an mzTab search file (.mzTab)",
+            accept = c(".mzTab")
+          )
+          
+        } else if (input$select_data_type == "FragPipe") {
+          
+          fileInput("tab_upload_data-upload_table",
+            label = "Upload a FragPipe search file (.tsv)",
             accept = c(".tsv")
           )
           

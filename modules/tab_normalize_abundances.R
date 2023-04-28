@@ -22,6 +22,7 @@ tab_normalize_abundances_ui <- function(id) {
             "linear",
             "limma",
             "loess",
+            "svm",
             "randomforest"
           ),
           multiple = TRUE
@@ -45,9 +46,6 @@ tab_normalize_abundances_ui <- function(id) {
             "min",
             "median",
             "randomforest"
-            # "mean",
-            # "max",
-            # "sum"
           )
         ),
         selectInput(ns("select_impute_method"),
@@ -105,7 +103,6 @@ tab_normalize_abundances_ui <- function(id) {
         width = 12,
         collapsed = TRUE,
         plotOutput(ns("plot_heatmap"), height = "650px") %>% withSpinner(type = 8)
-        # InteractiveComplexHeatmapOutput(ns("plot_interactive_heatmap"))
       )
       
     ),
