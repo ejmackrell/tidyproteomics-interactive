@@ -2,7 +2,7 @@
 
 This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics).
 
-This application is graciously hosted by the Proteome Exploration Laboratory at the Beckman Institute at Caltech:
+This application is hosted by the Proteome Exploration Laboratory at the Beckman Institute at Caltech:
 
 [bioinformatics.pel.caltech.edu/tidyproteomics/](bioinformatics.pel.caltech.edu/tidyproteomics/)
 
