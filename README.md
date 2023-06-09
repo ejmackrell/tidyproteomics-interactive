@@ -1,6 +1,10 @@
 # tidyproteomics-interactive
 
-This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics). 
+This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics).
+
+This application is graciously hosted by the Proteome Exploration Laboratory at the Beckman Institute at Caltech:
+
+bioinformatics.pel.caltech.edu/tidyproteomics/
 
 ## Cloning the repository
 Install [`{renv}`](https://github.com/rstudio/renv) (if it is not installed already) by executing `install.packages("renv")`. Then, create a new version-controlled project in RStudio and provide the URL for this repository. 
