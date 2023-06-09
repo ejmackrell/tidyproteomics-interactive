@@ -1,6 +1,6 @@
-# tidyproteomics-interactive
+# tidyproteomics-interactive <img src="www/logo.png" style="margin-left: 20px" align="right" height="125"/>
 
-This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics).
+This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics). 
 
 This application is hosted by the Proteome Exploration Laboratory at the Beckman Institute at Caltech:
 
