@@ -14,12 +14,12 @@ tab_expression_analysis_ui <- function(id) {
       
       box(
         title = "Differential expression parameters",
-        shinyjs::disabled(
-          awesomeCheckbox(ns("checkbox_use_normalized_values"),
-            label = "Use preprocessed abundances?",
-            value = FALSE
-          )
-        ),
+        # shinyjs::disabled(
+        #   awesomeCheckbox(ns("checkbox_use_normalized_values"),
+        #     label = "Use preprocessed abundances?",
+        #     value = FALSE
+        #   )
+        # ),
         selectInput(ns("select_group_one"),
           label = "Select a sample group (ratio numerator)",
           choices = NULL
@@ -372,46 +372,70 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     
     
     # Allow control over raw vs. pre-processed data usage if both are available
-    observe({
-      
-      if (!is.null(tp_normalized()) & length(experiments()) > 1) {
-      
-        updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-          label = "Use preprocessed abundances?",
-          value = TRUE
-        )
-        
-        shinyjs::enable("checkbox_use_normalized_values")
-        
-      } else {
-        
-        updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-          label = "Use preprocessed abundances?",
-          value = FALSE
-        )
-        
-        shinyjs::disable("checkbox_use_normalized_values")
-        
-      }
-      
-    })
-    
+    # observe({
+    #   
+    #   if (!is.null(tp_normalized()) & length(experiments()) > 1) {
+    #   
+    #     updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
+    #       label = "Use preprocessed abundances?",
+    #       value = TRUE
+    #     )
+    #     
+    #     shinyjs::enable("checkbox_use_normalized_values")
+    #     
+    #   } else {
+    #     
+    #     updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
+    #       label = "Use preprocessed abundances?",
+    #       value = FALSE
+    #     )
+    #     
+    #     shinyjs::disable("checkbox_use_normalized_values")
+    #     
+    #   }
+    #   
+    # })
+    # 
     
     # Set expression object with current tp or subsetted (pre-processed) tp object
     set_tp_expression <- eventReactive(input$action_expression_analysis, {
       
       tp_expression_analysis_annotated_filtered(NULL)
       
-      if (input$checkbox_use_normalized_values) {
+      # if (input$checkbox_use_normalized_values) {
+      #   
+      #   tp_expression(
+      #     tp_normalized() %>% 
+      #       tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
+      #         .method = statistical_methods[[input$select_statistical_method]]
+      #       )
+      #   )
+      #   
+      #   tp_expression()
+      #   
+      # } else 
+      
+      # Clear expression object upon normalization
+      # Reset outputs of expression tab if normalization, subset nullify object
+      # Do same for normalization tab
+      
+      if (!is.null(tp_expression())) {
         
         tp_expression(
-          tp_normalized() %>% 
+          tp_expression() %>%
             tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
               .method = statistical_methods[[input$select_statistical_method]]
             )
         )
         
-        tp_expression()
+      } else if (!is.null(tp_normalized())) {
+        
+        tp_expression(
+          tp_normalized() %>%
+            tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
+              .method = statistical_methods[[input$select_statistical_method]]
+            )
+        )
         
       } else if (!is.null(tp_subset())) {
         
@@ -422,8 +446,6 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
             )
         )
         
-        tp_expression()
-        
       } else {
         
         tp_expression(
@@ -433,9 +455,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
             )
         )
         
-        tp_expression()
-        
       }
+      
+      tp_expression()
       
     })
     

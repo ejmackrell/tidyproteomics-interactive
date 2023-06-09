@@ -16,7 +16,15 @@ ui <- dashboardPage(
     fixed = TRUE,
     div(
       style="font-weight:400;font-size:1.25rem;margin-left:7px",
-      "tidyproteomics-interactive"
+      "tidyproteomics-interactive",
+    ),
+    rightUi = shiny::tags$li(
+      class = "dropdown",
+      a(
+        href = "https://github.com/ejmackrell/tidyproteomics-interactive", target = "_blank",
+        icon("github", style = "color: #777", class="fa-2xl")
+        # img(src = "github-mark.png", style = "height: 26px; margin-left: 11px;")
+      )
     )
   ),
   sidebar = dashboardSidebar(
@@ -26,6 +34,8 @@ ui <- dashboardPage(
     collapsed = TRUE,
     sidebarMenu(
       
+      id = "sidebar",
+      
       sidebarHeader("Data input and information"),
       tab_introduction_ui("tab_introduction")[["sidebar"]],
       tab_upload_data_ui("tab_upload_data")[["sidebar"]],
@@ -33,6 +43,7 @@ ui <- dashboardPage(
       sidebarHeader("Data preprocessing"),
       tab_subset_ui("tab_subset")[["sidebar"]],
       tab_normalize_abundances_ui("tab_normalize_abundances")[["sidebar"]],
+      tab_collapse_ui("tab_collapse")[["sidebar"]],
       
       sidebarHeader("Data analysis"),
       tab_expression_analysis_ui("tab_expression_analysis")[["sidebar"]],
@@ -59,6 +70,7 @@ ui <- dashboardPage(
       tab_upload_data_ui("tab_upload_data")[["body"]],
       tab_subset_ui("tab_subset")[["body"]],
       tab_normalize_abundances_ui("tab_normalize_abundances")[["body"]],
+      tab_collapse_ui("tab_collapse")[["body"]],
       tab_expression_analysis_ui("tab_expression_analysis")[["body"]],
       tab_enrichment_analysis_ui("tab_enrichment_analysis")[["body"]]
     )

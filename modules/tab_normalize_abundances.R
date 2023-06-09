@@ -114,7 +114,7 @@ tab_normalize_abundances_ui <- function(id) {
 }
 
 
-tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
+tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp_expression) {
   
   moduleServer(id, function(input, output, session) {
     
@@ -228,6 +228,9 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized) {
             }
           }
       )
+      
+      # Clear downstream object
+      tp_expression(NULL)
       
       tp_normalized()
       

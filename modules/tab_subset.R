@@ -61,7 +61,7 @@ tab_subset_ui <- function(id) {
         br(),
         
         awesomeCheckbox(ns("checkbox_reassign"),
-          label = "Reassign sample groups?",
+          label = "Reassign sample groups? Names must not start with a number.",
           value = FALSE
         ),
         rhandsontable::rHandsontableOutput(ns("table_reassign_samples")),
@@ -349,7 +349,6 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
           input$text_contaminant_pattern == ""
         } |
         {
-          
           input$checkbox_reassign &
           "" %in% {input$table_reassign_samples$data %>% 
               map_df(
@@ -359,6 +358,18 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
                 )
               ) %>% 
               pull(new_sample_name)}
+        } |
+        {
+          input$checkbox_reassign &
+          1 %in% {input$table_reassign_samples$data %>% 
+              map_df(
+                .f = ~ tibble::as_tibble(.x, 
+                  .name_repair = ~{input$table_reassign_samples$params$rColnames %>% 
+                      as.character()}
+                )
+              ) %>% 
+              pull(new_sample_name) %>% 
+              stringr::str_locate(pattern = "[:digit:]")}[ , "start"]
         } |
         {
           !input$checkbox_enable_subsetting &

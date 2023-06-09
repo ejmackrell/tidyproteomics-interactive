@@ -80,6 +80,18 @@ tab_introduction_ui <- function(id) {
             abundance normalization, which can be performed using the methods
             chosen by the user in this tab."
           ),
+          timelineItem(
+            title = "Peptide collapse",
+            icon = icon("minimize"),
+            color = "info",
+            HTML("This tab appears once peptide-level data are uploaded to the
+            application. Peptide abundances are transformed into protein
+            abundances by using the <i>collapse</i> function of
+            <i>tidyproteomics</i>. <b>Please note that the collapse of
+            normalized peptide abundances into protein-level data is not
+            currently supported. </b>The unprocessed dataset will be used if the
+            data are not modified in the data subsetting tab.")
+          ),
           
           timelineLabel("Data analysis"),
           timelineItem(

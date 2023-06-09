@@ -200,3 +200,15 @@ label:not(.form-check-label):not(.custom-file-label) {
   opacity: 50% !important;
 }
 
+.checkbox span {
+  margin-left: 3px;
+}
+
+input[type="checkbox"] {
+  accent-color: #6597c8;  
+}
+
+.fa-2xl.fa-github {
+  padding: .8rem .25rem;
+}
+

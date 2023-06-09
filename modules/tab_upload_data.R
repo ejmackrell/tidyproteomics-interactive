@@ -39,7 +39,8 @@ tab_upload_data_ui <- function(id) {
           uiOutput(ns("dynamic_file_input")),
           div(id = ns("div_example_data"),
             div(style='text-align:center; font-weight:600;', '—or—'),
-              awesomeCheckbox(ns("checkbox_example_data"),
+              br(),
+              checkboxInput(ns("checkbox_example_data"),
                 label = "Use example dataset?",
                 value = FALSE
               ),
@@ -117,16 +118,23 @@ tab_upload_data_ui <- function(id) {
 }
 
 
-tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expression, tp_enrichment) {
+tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expression, tp_enrichment, tp_collapse) {
   
   moduleServer(id, function(input, output, session) {
     
     observe({
       
       # Example dataset for PD protein-level selection
-      if (input$select_data_type == "ProteomeDiscoverer" & input$select_analyte_type == "proteins") {
+      if (input$select_data_type == "ProteomeDiscoverer") {
         
         shinyjs::show("div_example_data")
+        
+        # updateAwesomeCheckbox(session, inputId = "checkbox_example_data", label = "Test")
+        # updateAwesomeCheckbox(session, inputId = "tab_upload_data-checkbox_example_data", label = "Test2")
+        
+        updateCheckboxInput(session, "checkbox_example_data", 
+          label = glue("Use example {input$select_analyte_type} data?")
+        )
         
       } else {
        
@@ -265,7 +273,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
       )
       
       
-      # Remove contaminant selection for MQ
+      # Remove contaminant selection for peptide data or MQ data
       if (input$select_analyte_type == "peptides" | input$select_data_type == "MaxQuant") {
         shinyjs::hide(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
       } else {
@@ -303,17 +311,35 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
           
         } else {
           
-          tp(
-            hela_proteins
-          )
+          if (input$select_analyte_type == "proteins") {
           
-          # Reset subsetted and normalized objects upon upload of new data
-          tp_subset(NULL)
-          tp_normalized(NULL)
-          tp_expression(NULL)
-          tp_enrichment(NULL)
-          
-          tp()
+            tp(
+              hela_proteins
+            )
+            
+            # Reset subsetted and normalized objects upon upload of new data
+            tp_subset(NULL)
+            tp_normalized(NULL)
+            tp_expression(NULL)
+            tp_enrichment(NULL)
+            
+            tp()
+            
+          } else {
+            
+            tp(
+              hela_peptides
+            )
+            
+            # Reset subsetted and normalized objects upon upload of new data
+            tp_subset(NULL)
+            tp_normalized(NULL)
+            tp_expression(NULL)
+            tp_enrichment(NULL)
+            
+            tp()
+            
+          }
           
         }
         
@@ -327,9 +353,35 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
     })
     
     
+    set_tp_from_collapse <- eventReactive(tp_collapse(), {
+      
+      if (!is.null(tp_collapse())) {
+      
+        tp(
+          tp_collapse()
+        )
+      
+        if (tp()$origin == "MaxQuant") {
+          
+          shinyjs::hide(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
+          
+        } else {
+          
+          shinyjs::show(selector = "a[data-value='tab_upload_data-box_contaminant_selection']")
+          
+        }
+        
+        tp()
+          
+      } else NULL
+      
+    }, ignoreNULL = FALSE)
+    
+    
     output$text_tidyproteomics_summary <- renderUI({
       
       shiny::req(set_tp())
+      set_tp_from_collapse()
       
       validate(
         need(!is.character(set_tp()), set_tp())
