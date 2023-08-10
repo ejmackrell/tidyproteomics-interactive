@@ -1,12 +1,16 @@
-# tidyproteomics-interactive <img src="www/logo.png" style="margin-left: 20px" align="right" height="125"/>
+# tidyproteomics-interactive <img src="www/logo.png" style="margin-left: 15px; margin-bottom: 10px" align="right" height="125"/>
 
 [![](https://img.shields.io/badge/Article-10.1186%2Fs12859.023.05360.7-8A2BE2)](https://doi.org/10.1186/s12859-023-05360-7)
 
-This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics). 
+This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics). Users may upload their protein- or peptide-level data for abundance subsetting, contaminant removal, abundance normalization, differential expression analysis, and ontology enrichment.
+
+## Using the application
 
 This application is hosted by the Proteome Exploration Laboratory at the Beckman Institute at Caltech:
 
 [bioinformatics.pel.caltech.edu/tidyproteomics/](http://bioinformatics.pel.caltech.edu/tidyproteomics/)
+
+You can also run the application locally in RStudio by following the instructions below.
 
 ## Cloning the repository
 Install [`{renv}`](https://github.com/rstudio/renv) (if it is not installed already) by executing `install.packages("renv")`. Then, create a new version-controlled project in RStudio and provide the URL for this repository. 
