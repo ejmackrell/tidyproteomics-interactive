@@ -544,10 +544,10 @@
     },
     "commonmark": {
       "Package": "commonmark",
-      "Version": "1.8.1",
+      "Version": "1.9.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b6e3e947d1d7ebf3d2bdcea1bde63fe7",
+      "Hash": "d691c61bff84bd63c383874d2d0c3307",
       "Requirements": []
     },
     "cowplot": {
@@ -1020,6 +1020,16 @@
       "Hash": "4f2596dfb05dac67b9dc558e5c6fba2e",
       "Requirements": []
     },
+    "gridExtra": {
+      "Package": "gridExtra",
+      "Version": "2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7d7f283939f563670a697165b2cf5560",
+      "Requirements": [
+        "gtable"
+      ]
+    },
     "gtable": {
       "Package": "gtable",
       "Version": "0.3.1",
@@ -1278,6 +1288,17 @@
       "Repository": "CRAN",
       "Hash": "7ce2733a9826b3aeb1775d56fd305472",
       "Requirements": []
+    },
+    "markdown": {
+      "Package": "markdown",
+      "Version": "1.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0ffaea87c070a56d140ce00b0727b278",
+      "Requirements": [
+        "commonmark",
+        "xfun"
+      ]
     },
     "matrixStats": {
       "Package": "matrixStats",
@@ -1803,25 +1824,6 @@
         "stringr"
       ]
     },
-    "rfasta": {
-      "Package": "rfasta",
-      "Version": "0.8.0",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteUsername": "jeffsocal",
-      "RemoteRepo": "rfasta",
-      "RemoteRef": "main",
-      "RemoteSha": "4001df54a09460a263065818fd21595116ab1fdf",
-      "Hash": "5744137b4f094d8969e4d72428968b15",
-      "Requirements": [
-        "cli",
-        "dplyr",
-        "readr",
-        "rlang",
-        "stringr"
-      ]
-    },
     "rhandsontable": {
       "Package": "rhandsontable",
       "Version": "0.3.8",
@@ -2242,15 +2244,15 @@
     },
     "tidyproteomics": {
       "Package": "tidyproteomics",
-      "Version": "1.4.1",
+      "Version": "1.5.6",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "jeffsocal",
       "RemoteRepo": "tidyproteomics",
       "RemoteRef": "main",
-      "RemoteSha": "62d540db2844b445ad4ce660432f67fc0232518e",
-      "Hash": "4f9fb8620b42e74b282ff5d683fea181",
+      "RemoteSha": "31d8a0861d95dfe9cc3be84244e48733986ce3e6",
+      "Hash": "cc7ee7d68ed2ef8a59754d1e3162210f",
       "Requirements": [
         "Biostrings",
         "RColorBrewer",
@@ -2510,10 +2512,10 @@
     },
     "xfun": {
       "Package": "xfun",
-      "Version": "0.35",
+      "Version": "0.39",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f576593107bdf9aa7db48ef75a8c05fb",
+      "Hash": "8f56e9acb54fb525e66464d57ab58bcb",
       "Requirements": []
     },
     "xml2": {

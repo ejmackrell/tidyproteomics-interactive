@@ -19,6 +19,7 @@ tab_normalize_abundances_ui <- function(id) {
           width = "300px",
           choices = list(
             "median",
+            "scaled",
             "linear",
             "limma",
             "loess",
@@ -51,8 +52,9 @@ tab_normalize_abundances_ui <- function(id) {
         selectInput(ns("select_impute_method"),
           label = "Select a method for imputation",
           choices = c(
-            "within",
-            "between"
+            "row",
+            "column",
+            "matrix"
           )
         ),
         br(),
@@ -202,8 +204,8 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
               {
                 if (input$checkbox_impute) {
                   impute(.,
-                    impute_function = imputation_methods[[input$select_impute_function]],
-                    method = if (input$select_impute_function == "randomforest") "between" else input$select_impute_method
+                    .function = imputation_methods[[input$select_impute_function]],
+                    method = if (input$select_impute_function == "randomforest") "matrix" else input$select_impute_method
                   )
                 } else .
               } %>%
@@ -219,8 +221,8 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
               {
                 if (input$checkbox_impute) {
                   impute(.,
-                    impute_function = imputation_methods[[input$select_impute_function]],
-                    method = if (input$select_impute_function == "randomforest") "between" else input$select_impute_method
+                    .function = imputation_methods[[input$select_impute_function]],
+                    method = if (input$select_impute_function == "randomforest") "matrix" else input$select_impute_method
                   )
                 } else .
               } 
@@ -267,7 +269,7 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
       isolate({
         
         tp_normalized() %>% 
-          plot_variation_cv() %>% 
+          plot_variation_cv_mod() %>% 
           ggplotly() %>% 
           plotly::layout(
             font = list(

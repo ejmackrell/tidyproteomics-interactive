@@ -442,11 +442,14 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
                 reduce2(
                   .x = df_sample_names$sample_id,
                   .y = df_sample_names$new_sample_name,
-                  .f = ~ reassign(.x, 
-                    field = "sample_id",
-                    pattern = ..2,
-                    replace = ..3
-                  ),
+                  .f = ~ {
+                    
+                    reassign(.x, 
+                      sample_id %like% !!..2,
+                      .replace = ..3
+                    )
+                    
+                  },
                   .init = .
                 )
               
