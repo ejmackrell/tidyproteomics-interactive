@@ -36,7 +36,7 @@ The application is available as a Docker image on [Docker Hub](https://hub.docke
 
     to pull the Docker image, build a Docker container, and run the application.
 
-You may access the running application at [`http://localhost:3838`](http://localhost:3838). To change the port from the default 3838, edit the specification for `ports` in `docker-compose.yml` (e.g., to `5000:3838` to access the application at port 5000).
+You may access the running application at [`http://localhost:3838`](http://localhost:3838). To change the port from the default 3838, edit the specification for `ports` in `docker-compose.yml` (e.g., to `5000:3838` for accessing the application at port 5000).
 
 ------------------------------------------------------------------------
 
@@ -56,4 +56,5 @@ Once the project is opened in your RStudio session, execute `renv::activate()` t
 
 ## Citation
 
-If you use this application for your research, please cite our article. \> Jones, J., MacKrell, E.J., Wang, TY. *et al*. Tidyproteomics: an open-source R package and data object for quantitative proteomics post analysis and visualization. *BMC Bioinformatics* **24**, 239 (2023).
+If you use this application for your research, please cite our article. 
+> Jones, J., MacKrell, E.J., Wang, TY. *et al*. Tidyproteomics: an open-source R package and data object for quantitative proteomics post analysis and visualization. *BMC Bioinformatics* **24**, 239 (2023).
