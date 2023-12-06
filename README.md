@@ -1,6 +1,7 @@
 # tidyproteomics-interactive <img src="app/www/logo.png" style="margin-left: 15px; margin-bottom: 10px" align="right" height="125"/>
 
 [![](https://img.shields.io/badge/Article-10.1186%2Fs12859.023.05360.7-8A2BE2)](https://doi.org/10.1186/s12859-023-05360-7) [![](https://img.shields.io/docker/v/ejmackrell/tidyproteomics-interactive?sort=semver&color=blueviolet&label=Docker%20release)](https://hub.docker.com/r/ejmackrell/tidyproteomics-interactive)
+![Uptime Robot status](https://img.shields.io/uptimerobot/status/m795855570-61ccd4c012b9f3693f426173?label=Caltech%20server)
 
 This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics). Users may upload their protein- or peptide-level data for abundance subsetting, contaminant removal, abundance normalization, differential expression analysis, and ontology enrichment.
 
