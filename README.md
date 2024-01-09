@@ -1,6 +1,7 @@
 # tidyproteomics-interactive <img src="app/www/logo.png" style="margin-left: 15px; margin-bottom: 10px" align="right" height="125"/>
 
 [![](https://img.shields.io/badge/Article-10.1186%2Fs12859.023.05360.7-8A2BE2)](https://doi.org/10.1186/s12859-023-05360-7) [![](https://img.shields.io/docker/v/ejmackrell/tidyproteomics-interactive?sort=semver&color=blueviolet&label=Docker%20release)](https://hub.docker.com/r/ejmackrell/tidyproteomics-interactive)
+![Uptime Robot status](https://img.shields.io/uptimerobot/status/m795855570-61ccd4c012b9f3693f426173?label=Caltech%20server)
 
 This repository contains a Shiny application for interactively working with the R package [`{tidyproteomics}`](https://github.com/jeffsocal/tidyproteomics). Users may upload their protein- or peptide-level data for abundance subsetting, contaminant removal, abundance normalization, differential expression analysis, and ontology enrichment.
 
@@ -26,7 +27,7 @@ The application is available as a Docker image on [Docker Hub](https://hub.docke
     $ git clone https://github.com/ejmackrell/tidyproteomics-interactive <dir>
     ```
 
-2.  Download and install [Docker Desktop](https://www.docker.com/)
+2.  Download, install, and start [Docker Desktop](https://www.docker.com/)
 
 3.  Navigate to the directory and run the command
 
@@ -42,15 +43,45 @@ You may access the running application at [`http://localhost:3838`](http://local
 
 ### Local installation with RStudio
 
-You can also run the application locally in RStudio by following the instructions below.
+You can also run and modify the application in RStudio by following the instructions below.
 
 #### Cloning the repository in RStudio
 
-Install [`{renv}`](https://github.com/rstudio/renv) (if it is not installed already) by executing `install.packages("renv")`. Then, create a new version-controlled project in RStudio and provide the URL for this repository.
+1. Install [`{renv}`](https://github.com/rstudio/renv) (if it is not installed already) by executing
+   
+   ```
+   install.packages("renv")
+   ```
+   in the R console.
+   
+3. Create a new version-controlled project in RStudio and provide the URL for this repository.
 
 #### Restoring the project
 
-Once the project is opened in your RStudio session, execute `renv::activate()` to load the project environment, which should download the appropriate version of [`{BiocManager}`](https://github.com/Bioconductor/BiocManager). Then, run `renv::restore()` to install all of the packages required for the project. If the repository for a Bioconductor package is not identified, you can manually install these packages individually by executing `renv::install("bioc::{package name}")`or instead as a group by specifying Bioconductor repositories with `renv::restore(repos = BiocManager::repositories())`.
+1. Once the project is opened in your RStudio session, run the command
+   
+    ``` R
+    renv::activate()
+    ```
+    
+    to load the project environment, which should download the appropriate version of [`{BiocManager}`](https://github.com/Bioconductor/BiocManager). 
+
+3. Restore the project with the command
+   
+   ``` R
+   renv::restore()
+   ```
+   to install all of the packages required for the project. If the repository for a Bioconductor package is not identified, you can manually install these packages individually by executing
+   
+   ``` R
+   renv::install("bioc::{package name}")
+   ```
+   
+   or instead as a group by specifying Bioconductor repositories with
+   
+   ``` R
+   renv::restore(repos = BiocManager::repositories())
+   ```
 
 ------------------------------------------------------------------------
 
