@@ -36,6 +36,9 @@ plugins:
 
 color_scheme: dark
 
+url: https://ejmackrell.github.io # the base hostname & protocol for your site
+baseurl: /tidyproteomics-interactive/ # the subpath of your site, e.g. /blog/
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
