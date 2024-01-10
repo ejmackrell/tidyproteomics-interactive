@@ -53,6 +53,12 @@ callouts:
     title: Warning
     color: red
 
+# Aux links for the upper right navigation
+aux_links:
+  "tidyproteomics-interactive on GitHub":
+    - "//github.com/ejmackrell/tidyproteomics-interactive"
+
+
 # url: https://ejmackrell.github.io # the base hostname & protocol for your site
 # baseurl: /tidyproteomics-interactive/ # the subpath of your site, e.g. /blog/
 
