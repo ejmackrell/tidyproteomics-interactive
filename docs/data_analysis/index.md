@@ -4,7 +4,7 @@
 
 layout: default
 title: Data analysis
-nav_order: 4
+nav_order: 5
 has_children: true
 ---
 To be continued.
