@@ -7,4 +7,4 @@ title: Data preprocessing
 nav_order: 4
 has_children: true
 ---
-To be continued.
+This section details the *Data subsetting and summary* and *Abundance normalization* tabs on the application. It is advisable, though not required, to pre-process your data in these tabs before conducting any expression analysis. 

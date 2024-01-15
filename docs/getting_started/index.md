@@ -10,7 +10,7 @@ nav_order: 2
 \\
 This application is hosted for public use by the Proteome Exploration Laboratory at the Beckman Institute at Caltech:
 
-[bioinformatics.pel.caltech.edu/tidyproteomics/](http://bioinformatics.pel.caltech.edu/tidyproteomics/)
+<a href="http://bioinformatics.pel.caltech.edu/tidyproteomics/" target="_blank">Launch application</a>{: .btn .btn-purple }
 
 You may also run the application locally by following the instructions below.
 

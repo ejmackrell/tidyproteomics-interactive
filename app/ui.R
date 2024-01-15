@@ -21,6 +21,11 @@ ui <- dashboardPage(
     rightUi = shiny::tags$li(
       class = "dropdown",
       a(
+        href = "https://ejmackrell.github.io/tidyproteomics-interactive/", target = "_blank",
+        icon("circle-question", style = "color: #777; margin-right: 10px", class="fa-2xl fa-solid")
+        # img(src = "github-mark.png", style = "height: 26px; margin-left: 11px;")
+      ),
+      a(
         href = "https://github.com/ejmackrell/tidyproteomics-interactive", target = "_blank",
         icon("github", style = "color: #777", class="fa-2xl")
         # img(src = "github-mark.png", style = "height: 26px; margin-left: 11px;")

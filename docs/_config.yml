@@ -18,7 +18,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 # logo: "assets/images/logo.png"
-title: tidyproteomics
+title: tidyproteomics-interactive
 email: emackrel@caltech.edu
 description: >- # this means to ignore newlines until "baseurl:"
   Write an awesome description for your new site here. You can edit this
@@ -38,11 +38,9 @@ color_scheme: dark
 
 callouts_level: loud # or loud
 callouts:
-  highlight:
-    color: yellow
   important:
     title: Important
-    color: blue
+    color: yellow
   new:
     title: New
     color: green
@@ -57,7 +55,7 @@ callouts:
 aux_links:
   "tidyproteomics-interactive on GitHub":
     - "//github.com/ejmackrell/tidyproteomics-interactive"
-
+aux_links_new_tab: true
 
 # url: https://ejmackrell.github.io # the base hostname & protocol for your site
 # baseurl: /tidyproteomics-interactive/ # the subpath of your site, e.g. /blog/
