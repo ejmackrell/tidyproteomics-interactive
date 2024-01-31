@@ -397,10 +397,10 @@
     },
     "bs4Dash": {
       "Package": "bs4Dash",
-      "Version": "2.1.0",
+      "Version": "2.3.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "cca14515876425caa963eb95f52e4564",
+      "Hash": "9d3c4c0f9022322dbad0b3a68b86e81b",
       "Requirements": [
         "bslib",
         "fresh",
@@ -411,6 +411,18 @@
         "lifecycle",
         "shiny",
         "waiter"
+      ]
+    },
+    "bsicons": {
+      "Package": "bsicons",
+      "Version": "0.1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d8f892fbd94d0b9b1f6d688b05b8633c",
+      "Requirements": [
+        "cli",
+        "htmltools",
+        "rlang"
       ]
     },
     "bslib": {
@@ -2244,15 +2256,15 @@
     },
     "tidyproteomics": {
       "Package": "tidyproteomics",
-      "Version": "1.5.6",
+      "Version": "1.7.2",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "jeffsocal",
       "RemoteRepo": "tidyproteomics",
       "RemoteRef": "main",
-      "RemoteSha": "31d8a0861d95dfe9cc3be84244e48733986ce3e6",
-      "Hash": "cc7ee7d68ed2ef8a59754d1e3162210f",
+      "RemoteSha": "06984f69ea511b9eb18a4cee9452414b91843019",
+      "Hash": "92d12dc66debad27b6cce428eef946a9",
       "Requirements": [
         "Biostrings",
         "RColorBrewer",

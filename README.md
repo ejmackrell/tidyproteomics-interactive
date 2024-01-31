@@ -90,4 +90,6 @@ You can also run and modify the application in RStudio by following the instruct
 
 ## Citation
 
-If you use this application for your research, please cite our article. \> Jones, J., MacKrell, E.J., Wang, TY. *et al*. Tidyproteomics: an open-source R package and data object for quantitative proteomics post analysis and visualization. *BMC Bioinformatics* **24**, 239 (2023).
+If you use this application for your research, please cite our article.
+
+> Jones, J., MacKrell, E.J., Wang, TY. *et al*. Tidyproteomics: an open-source R package and data object for quantitative proteomics post analysis and visualization. *BMC Bioinformatics* **24**, 239 (2023).

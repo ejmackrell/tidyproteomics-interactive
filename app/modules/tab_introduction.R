@@ -37,6 +37,7 @@ tab_introduction_ui <- function(id) {
         title = "Application features",
         status = "info",
         width = 10,
+        HTML("<div>A detailed tutorial on using this application is available on its <a href='https://ejmackrell.github.io/tidyproteomics-interactive/' target='_blank'>dedicated documentation webpage.</a></div><br>"),
         timelineBlock(
           width = 12,
           

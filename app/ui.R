@@ -2,6 +2,7 @@
 ui <- dashboardPage(
   
   dark = NULL,
+  help = NULL,
   fullscreen = TRUE,
   
   header = dashboardHeader(
@@ -15,20 +16,21 @@ ui <- dashboardPage(
     compact = TRUE,
     fixed = TRUE,
     div(
-      style="font-weight:400;font-size:1.25rem;margin-left:7px",
-      "tidyproteomics-interactive",
+      style="font-weight:400;font-size:1.25rem;margin-left:7px;margin-right:7px",
+      "tidyproteomics-interactive"
     ),
+    span(class="left badge badge-secondary badge-pill",style="background: lightgrey; font-size: 0.75rem; font-weight: 400", "v1.2.0"),
     rightUi = shiny::tags$li(
       class = "dropdown",
       a(
         href = "https://ejmackrell.github.io/tidyproteomics-interactive/", target = "_blank",
-        icon("circle-question", style = "color: #777; margin-right: 10px", class="fa-2xl fa-solid")
-        # img(src = "github-mark.png", style = "height: 26px; margin-left: 11px;")
+        # icon("circle-question", style = "color: #777; margin-right: 10px", class="fa-2xl fa-solid")
+        bsicons::bs_icon("question-circle", color = "#777", size = "2em", margin_right = "10px")
       ),
       a(
         href = "https://github.com/ejmackrell/tidyproteomics-interactive", target = "_blank",
-        icon("github", style = "color: #777", class="fa-2xl")
-        # img(src = "github-mark.png", style = "height: 26px; margin-left: 11px;")
+        # icon("github", style = "color: #777", class="fa-2xl")
+        bsicons::bs_icon("github", color = "#777", size = "2em")
       )
     )
   ),

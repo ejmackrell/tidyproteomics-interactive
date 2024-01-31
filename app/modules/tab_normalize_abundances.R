@@ -15,7 +15,7 @@ tab_normalize_abundances_ui <- function(id) {
       box(
         title = "Normalization selection",
         selectInput(ns("select_normalization_method"),
-          label = "Select normalization methods",
+          label = "Select normalization methods for evaluation",
           width = "300px",
           choices = list(
             "median",
@@ -27,6 +27,16 @@ tab_normalize_abundances_ui <- function(id) {
             "randomforest"
           ),
           multiple = TRUE
+        ),
+        awesomeCheckbox(ns("checkbox_auto_normalization"),
+          label = "Automatically select optimal normalization method?",
+          value = TRUE
+        ),
+        hidden(
+          selectInput(ns("select_auto_normalization"),
+            label = "Select the user-specified normalization method",
+            choices = NULL
+          )
         ),
         br(),
         awesomeCheckbox(ns("checkbox_impute"),
@@ -105,6 +115,20 @@ tab_normalize_abundances_ui <- function(id) {
         width = 12,
         collapsed = TRUE,
         plotOutput(ns("plot_heatmap"), height = "650px") %>% withSpinner(type = 8)
+      ),
+      
+      box(
+        title = "Abundance export",
+        status = "info",
+        id = ns("box_export"),
+        width = 12,
+        collapsed = TRUE,
+        br(),
+        actionButton(ns("table_download"), 
+          label = "Download table",
+          icon = icon("download")
+        ),
+        reactableOutput(ns("table_export")) %>% withSpinner(type = 8)
       )
       
     ),
@@ -119,6 +143,27 @@ tab_normalize_abundances_ui <- function(id) {
 tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp_expression) {
   
   moduleServer(id, function(input, output, session) {
+    
+    
+    observeEvent(input$checkbox_auto_normalization, {
+      
+      if (input$checkbox_auto_normalization) shinyjs::hide("select_auto_normalization") else shinyjs::show("select_auto_normalization")
+      
+    })
+    
+    
+    observeEvent(input$select_normalization_method, {
+      
+      updateSelectInput(session, "select_auto_normalization", 
+        choices = if (is.null(input$select_normalization_method)) "raw" else c("raw", input$select_normalization_method),
+        selected = if (input$select_auto_normalization %in% input$select_normalization_method) input$select_auto_normalization else "raw"
+      )
+      
+    }, ignoreNULL = FALSE)
+    
+    
+    shinyjs::onclick("table_download", runjs(glue("Reactable.downloadDataCSV('tab_normalize_abundances-table_export', '{tp_normalized()$quantitative_source}_normalized_abundances_export.csv')")))
+    
     
     # Hide tab when no data is available
     output$tab_subset_availability <- reactive({  
@@ -146,7 +191,9 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
     observe({
       
       # Disable normalization/imputation method selection if null data or inappropriate methods chosen
-      if (is.null(tp()) | is.null(input$select_normalization_method)) shinyjs::disable("action_normalize") else shinyjs::enable("action_normalize")
+      if (is.null(tp()) | 
+          is.null(input$select_normalization_method) |
+          {input$checkbox_auto_normalization & is_empty(input$select_auto_normalization)}) shinyjs::disable("action_normalize") else shinyjs::enable("action_normalize")
       
       if (input$checkbox_impute == FALSE) {
         
@@ -184,7 +231,8 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
           "box_normalization_boxplots",
           "box_abundance_cvs_and_dynamic_range",
           "box_pca",
-          "box_heatmap"
+          "box_heatmap",
+          "box_export"
         ),
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
       )
@@ -199,19 +247,32 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
         
         {if (!is.null(tp_subset())) tp_subset() else tp()} %>% 
           {
+            
             if (input$select_imputation_order == "before") {
               
               {
                 if (input$checkbox_impute) {
+                  
                   impute(.,
                     .function = imputation_methods[[input$select_impute_function]],
                     method = if (input$select_impute_function == "randomforest") "matrix" else input$select_impute_method
                   )
+                  
                 } else .
+                
               } %>%
               normalize(
                 .method = input$select_normalization_method
-              )
+              ) %>% {
+                
+                if (!input$checkbox_auto_normalization) {
+                  
+                  select_normalization(., normalization = input$select_auto_normalization)
+                  
+                } else .
+                
+              }
+                
               
             } else if (input$select_imputation_order == "after") {
             
@@ -219,15 +280,28 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
                 .method = input$select_normalization_method
               ) %>%  
               {
+                
                 if (input$checkbox_impute) {
+                  
                   impute(.,
                     .function = imputation_methods[[input$select_impute_function]],
                     method = if (input$select_impute_function == "randomforest") "matrix" else input$select_impute_method
                   )
+                  
                 } else .
+                
+              } %>% {
+                
+                if (!input$checkbox_auto_normalization) {
+                  
+                  select_normalization(., normalization = input$select_auto_normalization)
+                  
+                } else .
+                
               } 
             
             }
+            
           }
       )
       
@@ -361,6 +435,32 @@ tab_normalize_abundances_server <- function(id, tp, tp_subset, tp_normalized, tp
           plot_heatmap()
           
         }
+        
+      })
+      
+    })
+    
+    # Render abundances export
+    output$table_export <- renderReactable({
+      
+      shiny::req(set_tp_normalized())
+      
+      isolate({
+        
+        tp_normalized() %>% 
+          as.data.frame(shape = "wide") %>% 
+          reactable(
+            sortable = TRUE,
+            filterable = TRUE,
+            searchable = TRUE,
+            highlight = TRUE,
+            resizable = TRUE,
+            wrap = FALSE,
+            defaultColDef = colDef(
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
+            )
+          )
         
       })
       

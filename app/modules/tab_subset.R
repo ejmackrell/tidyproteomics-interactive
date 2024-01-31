@@ -537,7 +537,8 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
             highlight = TRUE,
             resizable = TRUE,
             defaultColDef = colDef(
-              sortNALast = TRUE
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
             ),
             columns = build_summary_col_defs(.)
           )
@@ -564,6 +565,10 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
             searchable = TRUE,
             highlight = TRUE,
             resizable = TRUE,
+            defaultColDef = colDef(
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
+            ),
             columns = build_summary_col_defs(.)
           )
 
@@ -593,6 +598,10 @@ tab_subset_server <- function(id, tp, tp_subset, tp_normalized) {
             searchable = TRUE,
             highlight = TRUE,
             resizable = TRUE,
+            defaultColDef = colDef(
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
+            ),
             columns = build_summary_col_defs(.)
           )
       })

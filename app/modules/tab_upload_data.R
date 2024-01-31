@@ -345,7 +345,7 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
         
       },
         error = function(e) {
-          return("Failed to import table. Please verify the platform and analyte type match those of the table.")
+          return("Failed to import table. Please verify the platform and analyte type match those of the table, and please ensure there are no special characters (e.g., hyphens or slashes) in the sample names.")
         }
       )
         
@@ -439,7 +439,8 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
             highlight = TRUE,
             resizable = TRUE,
             defaultColDef = colDef(
-              sortNALast = TRUE
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
             ),
             columns = build_summary_col_defs(.)
           )
@@ -466,6 +467,10 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
             searchable = TRUE,
             highlight = TRUE,
             resizable = TRUE,
+            defaultColDef = colDef(
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
+            ),
             columns = build_summary_col_defs(.)
           )
         
@@ -495,6 +500,10 @@ tab_upload_data_server <- function(id, tp, tp_subset, tp_normalized, tp_expressi
             searchable = TRUE,
             highlight = TRUE,
             resizable = TRUE,
+            defaultColDef = colDef(
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
+            ),
             columns = build_summary_col_defs(.)
           )
       })

@@ -235,7 +235,8 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
             searchable = TRUE,
             defaultColDef = colDef(
               cell = render_enrichment_reactable,
-              sortNALast = TRUE
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
             ),
             columns = list(
               annotation = colDef(
@@ -257,7 +258,7 @@ tab_enrichment_analysis_server <- function(id, tp, tp_expression, tp_enrichment)
                     resizable = TRUE,
                     defaultColDef = colDef(
                       cell = render_expression_reactable,
-                      headerStyle = list(background = "#f7f7f8")
+                      headerStyle = list(background = "#FAFAFA")
                     )
                   ),
                   br()

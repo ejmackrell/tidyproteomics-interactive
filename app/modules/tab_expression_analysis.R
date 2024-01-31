@@ -44,104 +44,176 @@ tab_expression_analysis_ui <- function(id) {
         )
       ),
       
-      box(
-        title = "Volcano plot / Expression plot",
+      tabBox(
         status = "info",
-        id = ns("box_volcano_plot"),
+        id = ns("box_plots"),
+        type = "tabs",
         width = 12,
         height = 650,
         collapsed = TRUE,
-        plotlyOutput(ns("plot_volcano_plot"), height = 600) %>% withSpinner(type = 8),
+        tabPanel(
+          title = "Interactive plot",
+          plotlyOutput(ns("plot_interactive_plot"), height = 600) %>% withSpinner(type = 8),
+          value = ns("box_interactive_volcano")
+        ),
+        tabPanel(
+          title = "Static volcano plot",
+          plotOutput(ns("plot_static_volcano_plot"), height = 600) %>% withSpinner(type = 8),
+          value = ns("box_static_volcano")
+        ),
+        tabPanel(
+          title = "Static proportion plot",
+          plotOutput(ns("plot_static_proportion_plot"), height = 600) %>% withSpinner(type = 8),
+          value = ns("box_static_proportion")
+        ),
         sidebar = boxSidebar(
           id = ns("box_volcano_plot_sidebar"),
           easyClose = FALSE,
-          # background = "#2d537c",
           background = "#e9e9e9",
-          # width = 32,
-          fluidRow(
-            column(6,
-              selectInput(ns("select_volcano_x_axis"),
-                label = "Select an x-axis variable",
-                choices = c(
-                  "log2(foldchange)" = "log2_foldchange",
-                  "foldchange" = "foldchange"
-                ),
-                selected = "log2_foldchange"
+          div(
+            id = ns("options_static_volcano"),
+            fluidRow(
+              column(6,
+                checkboxInput(ns("checkbox_static_volcano_panels"), "Show colored fold change panels?", value = TRUE),
+                checkboxInput(ns("checkbox_static_volcano_lines"), "Show fold change thresholds?", value = TRUE),
+                checkboxInput(ns("checkbox_static_volcano_fc_scale"), "Show ratio scale?", value = TRUE),
+                selectInput(ns("select_static_volcano_sig_column"), "Sigificance column", 
+                  choices = c("p-value" = "p_value", "adjusted p-value" = "adj_p_value"),
+                  selected = "adj_p_value"
+                )
+              ),
+              column(6,
+                sliderInput(ns("slider_static_volcano_sig_max"), "Significance threshold", min = 0.01, max = 0.1, value = 0.05, step = 0.01),
+                sliderInput(ns("slider_static_volcano_fc_min"), "Fold change threshold", min = 0.5, max = 4, value = 1, step = 0.1),
+                colorPickr(ns("pick_static_volcano_positive"), "Upregulated protein color", selected = "#1e90ff"),
+                colorPickr(ns("pick_static_volcano_negative"), "Downregulated protein color", selected = "#ff3030")
               )
             ),
-            column(6,
-              selectInput(ns("select_volcano_y_axis"),
-                label = "Select a y-axis variable",
-                choices = c(
-                  "p-value" = "p_value",
-                  "adjusted p-value" = "adj_p_value",
-                  "-log10(p-value)" = "-log10(p_value)",
-                  "-log10(adjusted p-value)" = "-log10(adj_p_value)",
-                  "average expression" = "average_expression",
-                  "proportional expression" = "proportional_expression",
-                  "log10(average expression)" = "log10(average_expression)",
-                  "log10(proportional expression)" = "log10(proportional_expression)"
-                ),
-                selected = "-log10(adj_p_value)"
-              )
-            )
-          ),
-          fluidRow(
-            column(6,
-              selectInput(ns("select_volcano_color"),
-                label = "Select a color variable",
-                choices = c(
-                  "fixed" = "fixed",
-                  "log10(average expression)" = "log10(average_expression)",
-                  "log10(proportional expression)" = "log10(proportional_expression)",
-                  "imputed" = "imputed",
-                  "p-value" = "p_value",
-                  "adjusted p-value" = "adj_p_value",
-                  "-log10(p-value)" = "-log10(p_value)",
-                  "-log10(adjusted p-value)" = "-log10(adj_p_value)"
-                ),
-                selected = "fixed"
-              )
-            ),
-            column(6,
-              colorPickr(ns("pick_volcano_color"),
-                label = "Choose a color",
-                selected = "#1049B0"
-              )
-            )
-          ),
-          fluidRow(
-            column(6,
-              sliderInput(ns("slider_volcano_marker_alpha"),
-                label = "Set marker opacity",
-                value = 0.5,
-                min = 0,
-                max = 1
-              )
-            )
-          ),
-          fluidRow(
-            column(6,
-              selectInput(ns("select_volcano_size"),
-                label = "Select a size variable",
-                choices = c(
-                  "fixed" = "fixed",
-                  "log10(average expression)" = "log10(average_expression)",
-                  "log10(proportional expression)" = "log10(proportional_expression)",
-                  "imputed" = "imputed",
-                  "p-value" = "p_value",
-                  "adjusted p-value" = "adj_p_value",
-                  "-log10(p-value)" = "-log10(p_value)",
-                  "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+            br(),
+            fluidRow(
+              column(12,
+                actionButton(ns("action_replot_static_volcano"),
+                  label = "Update plot"
                 )
               )
             )
           ),
-          br(),
-          fluidRow(
-            column(12,
-              actionButton(ns("action_replot_volcano"),
-                label = "Update plot"
+          div(
+            id = ns("options_static_proportion"),
+            fluidRow(
+              column(6,
+                checkboxInput(ns("checkbox_static_proportion_panels"), "Show colored fold change panels?", value = TRUE),
+                checkboxInput(ns("checkbox_static_proportion_lines"), "Show fold change thresholds?", value = TRUE),
+                checkboxInput(ns("checkbox_static_proportion_fc_scale"), "Show ratio scale?", value = TRUE),
+                selectInput(ns("select_static_proportion_sig_column"), "Sigificance column", 
+                  choices = c("p-value" = "p_value", "adjusted p-value" = "adj_p_value"),
+                  selected = "adj_p_value"
+                )
+              ),
+              column(6,
+                sliderInput(ns("slider_static_proportion_min"), "Proportion threshold", min = 0.01, max = 5, value = 1, step = 0.01),
+                sliderInput(ns("slider_static_proportion_sig_max"), "Significance threshold", min = 0.01, max = 0.1, value = 0.05, step = 0.01),
+                sliderInput(ns("slider_static_proportion_fc_min"), "Fold change threshold", min = 0.5, max = 4, value = 1, step = 0.1),
+                colorPickr(ns("pick_static_proportion_positive"), "Upregulated protein color", selected = "#1e90ff"),
+                colorPickr(ns("pick_static_proportion_negative"), "Downregulated protein color", selected = "#ff3030")
+              )
+            ),
+            br(),
+            fluidRow(
+              column(12,
+                actionButton(ns("action_replot_static_proportion"),
+                  label = "Update plot"
+                )
+              )
+            )
+          ),
+          div(
+            id = ns("options_interactive_volcano"),
+            fluidRow(
+              column(6,
+                selectInput(ns("select_volcano_x_axis"),
+                  label = "Select an x-axis variable",
+                  choices = c(
+                    "log2(foldchange)" = "log2_foldchange",
+                    "foldchange" = "foldchange"
+                  ),
+                  selected = "log2_foldchange"
+                )
+              ),
+              column(6,
+                selectInput(ns("select_volcano_y_axis"),
+                  label = "Select a y-axis variable",
+                  choices = c(
+                    "p-value" = "p_value",
+                    "adjusted p-value" = "adj_p_value",
+                    "-log10(p-value)" = "-log10(p_value)",
+                    "-log10(adjusted p-value)" = "-log10(adj_p_value)",
+                    "average expression" = "average_expression",
+                    "proportional expression" = "proportional_expression",
+                    "log10(average expression)" = "log10(average_expression)",
+                    "log10(proportional expression)" = "log10(proportional_expression)"
+                  ),
+                  selected = "-log10(adj_p_value)"
+                )
+              )
+            ),
+            fluidRow(
+              column(6,
+                selectInput(ns("select_volcano_color"),
+                  label = "Select a color variable",
+                  choices = c(
+                    "fixed" = "fixed",
+                    "log10(average expression)" = "log10(average_expression)",
+                    "log10(proportional expression)" = "log10(proportional_expression)",
+                    "imputed" = "imputed",
+                    "p-value" = "p_value",
+                    "adjusted p-value" = "adj_p_value",
+                    "-log10(p-value)" = "-log10(p_value)",
+                    "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+                  ),
+                  selected = "fixed"
+                )
+              ),
+              column(6,
+                colorPickr(ns("pick_volcano_color"),
+                  label = "Choose a color",
+                  selected = "#1049B0"
+                )
+              )
+            ),
+            fluidRow(
+              column(6,
+                sliderInput(ns("slider_volcano_marker_alpha"),
+                  label = "Set marker opacity",
+                  value = 0.5,
+                  min = 0,
+                  max = 1
+                )
+              )
+            ),
+            fluidRow(
+              column(6,
+                selectInput(ns("select_volcano_size"),
+                  label = "Select a size variable",
+                  choices = c(
+                    "fixed" = "fixed",
+                    "log10(average expression)" = "log10(average_expression)",
+                    "log10(proportional expression)" = "log10(proportional_expression)",
+                    "imputed" = "imputed",
+                    "p-value" = "p_value",
+                    "adjusted p-value" = "adj_p_value",
+                    "-log10(p-value)" = "-log10(p_value)",
+                    "-log10(adjusted p-value)" = "-log10(adj_p_value)"
+                  )
+                )
+              )
+            ),
+            br(),
+            fluidRow(
+              column(12,
+                actionButton(ns("action_replot_volcano"),
+                  label = "Update plot"
+                )
               )
             )
           )
@@ -220,6 +292,33 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
   
   moduleServer(id, function(input, output, session) {
     
+    
+    observeEvent(input$box_plots, {
+      
+      if (input$box_plots == "tab_expression_analysis-box_interactive_volcano") {
+        
+        
+        shinyjs::show("options_interactive_volcano")
+        shinyjs::hide("options_static_volcano")
+        shinyjs::hide("options_static_proportion")
+        
+      } else if (input$box_plots == "tab_expression_analysis-box_static_volcano") {
+        
+        shinyjs::hide("options_interactive_volcano")
+        shinyjs::show("options_static_volcano")
+        shinyjs::hide("options_static_proportion")
+        
+      } else if (input$box_plots == "tab_expression_analysis-box_static_proportion") {
+        
+        shinyjs::hide("options_interactive_volcano")
+        shinyjs::hide("options_static_volcano")
+        shinyjs::show("options_static_proportion")
+        
+      }
+      
+    })
+    
+    
     # Callback to download DEG table
     shinyjs::onclick("table_download", runjs(glue("Reactable.downloadDataCSV('tab_expression_analysis-table_differential_expression', '{input$select_group_one}_vs_{input$select_group_two}_expression_analysis.csv')")))
     
@@ -257,7 +356,7 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
       map(
         .x = c(
-          "box_volcano_plot",
+          "box_plots_box",
           "box_table_differential_expression"
         ),
         .f = ~ if (input[[.x]]$collapsed) updateBox(.x, action = 'toggle')
@@ -371,53 +470,10 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
     })
     
     
-    # Allow control over raw vs. pre-processed data usage if both are available
-    # observe({
-    #   
-    #   if (!is.null(tp_normalized()) & length(experiments()) > 1) {
-    #   
-    #     updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-    #       label = "Use preprocessed abundances?",
-    #       value = TRUE
-    #     )
-    #     
-    #     shinyjs::enable("checkbox_use_normalized_values")
-    #     
-    #   } else {
-    #     
-    #     updateAwesomeCheckbox(session, "checkbox_use_normalized_values",
-    #       label = "Use preprocessed abundances?",
-    #       value = FALSE
-    #     )
-    #     
-    #     shinyjs::disable("checkbox_use_normalized_values")
-    #     
-    #   }
-    #   
-    # })
-    # 
-    
     # Set expression object with current tp or subsetted (pre-processed) tp object
     set_tp_expression <- eventReactive(input$action_expression_analysis, {
       
       tp_expression_analysis_annotated_filtered(NULL)
-      
-      # if (input$checkbox_use_normalized_values) {
-      #   
-      #   tp_expression(
-      #     tp_normalized() %>% 
-      #       tidyproteomics::expression(!!input$select_group_one/!!input$select_group_two,
-      #         .method = statistical_methods[[input$select_statistical_method]]
-      #       )
-      #   )
-      #   
-      #   tp_expression()
-      #   
-      # } else 
-      
-      # Clear expression object upon normalization
-      # Reset outputs of expression tab if normalization, subset nullify object
-      # Do same for normalization tab
       
       if (!is.null(tp_expression())) {
         
@@ -515,9 +571,68 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
       
     })
     
+    # Render static volcano plot
+    output$plot_static_volcano_plot <- renderPlot({
+      
+      shiny::req(set_tp_expression())
+      input$action_replot_static_volcano
+      
+      isolate({
+        
+        shiny::req(tp_expression()$analysis)
+        
+        tp_expression() %>% 
+          plot_volcano(!!input$select_group_one/!!input$select_group_two,
+            labels_column = if ("gene_name" %in% unique(.$annotations$term)) "gene_name" else "protein",
+            log2fc_min = input$slider_static_volcano_fc_min,
+            significance_max = input$slider_static_volcano_sig_max,
+            show_pannels = input$checkbox_static_volcano_panels,
+            show_lines = input$checkbox_static_volcano_lines,
+            show_fc_scale = input$checkbox_static_volcano_fc_scale,
+            significance_column = input$select_static_volcano_sig_column,
+            color_positive = input$pick_static_volcano_positive,
+            color_negative = input$pick_static_volcano_negative,
+            destination = "plot"
+          )
+          
+        
+      })
+      
+    })
     
-    # Render volcano plot
-    output$plot_volcano_plot <- renderPlotly({
+    
+    output$plot_static_proportion_plot <- renderPlot({
+      
+      shiny::req(set_tp_expression())
+      input$action_replot_static_proportion
+      
+      isolate({
+        
+        shiny::req(tp_expression()$analysis)
+        
+        tp_expression() %>% 
+          plot_proportion(!!input$select_group_one/!!input$select_group_two,
+            labels_column = if ("gene_name" %in% unique(.$annotations$term)) "gene_name" else "protein",
+            log2fc_min = input$slider_static_proportion_fc_min,
+            proportion_min = input$slider_static_proportion_min / 100,
+            significance_max = input$slider_static_proportion_sig_max,
+            show_pannels = input$checkbox_static_proportion_panels,
+            show_lines = input$checkbox_static_proportion_lines,
+            show_fc_scale = input$checkbox_static_proportion_fc_scale,
+            significance_column = input$select_static_proportion_sig_column,
+            color_positive = input$pick_static_proportion_positive,
+            color_negative = input$pick_static_proportion_negative,
+            destination = "plot"
+          )
+        
+        
+      })
+      
+    })
+    
+    
+    # Render interactive plot
+    output$plot_interactive_plot <- renderPlotly({
       
       shiny::req(set_tp_expression())
       input$action_replot_volcano
@@ -611,7 +726,9 @@ tab_expression_analysis_server <- function(id, tp, tp_subset, tp_normalized, tp_
             filterable = TRUE,
             searchable = TRUE,
             defaultColDef = colDef(
-              cell = render_expression_reactable
+              cell = render_expression_reactable,
+              sortNALast = TRUE,
+              headerStyle = list(background = "#FAFAFA")
             ),
             columns = list(
               protein = colDef(

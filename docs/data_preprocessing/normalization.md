@@ -13,7 +13,13 @@ We are now prepared to subject our protein abundance matrix to the normalization
 Any modifications made to the data object in later tabs of the application (e.g., expression or enrichment analysis)  will be reset if normalization operations are re-executed. This is done to prevent misleading the user with outdated post-processing analysis outputs.
 
 <br/>
-As the optimal normalization routine is often data dependent, it is generally advisable to evaluate several routines to see which provides the greatest benefits with regard to reduction in coefficient of variation and replicate clustering. Here, we will evaluate median, linear, quantile (i.e., limma), and LOESS normalization. Additionally, we will accept the default parameters for imputing missing values in the data. Once we have selected our choices, the *Run normalization* button will be enabled.
+As the optimal normalization routine is often data dependent, it is generally advisable to evaluate several routines to see which provides the greatest benefits with regard to reduction in coefficient of variation and replicate clustering. Here, we will evaluate median, linear, quantile (i.e., limma), and LOESS normalization, and we will allow *tidyproteomics* to select the optimal normalization method based on reduction in CV and variance explained in top principal components.  <br/><br/>
+
+{: .note}
+Deselecting the *Automatically select optimal normalization method* choice will allow you to use the raw abundance values for the principal component analysis scores plot and clustered abundance heatmap.
+
+<br/>
+Additionally, we will accept the default parameters for imputing missing values in the data. Once we have selected our choices, the *Run normalization* button will be enabled.
 <br/><br/>
 <img style="" class="preview" src="../assets/images/data_preprocessing/normalization_options.png"/>
 <br/><br/>
@@ -42,6 +48,10 @@ Next, we see a principal components analysis of the samples normalized with the 
 <img style="" class="preview" src="../assets/images/data_preprocessing/normalization_heatmap.png"/>
 <br/><br/>
 The last analysis output we see is a hierarchically clustered heatmap of the replicates in each treatment group. Some of the differences that generalize within treatment groups may be evident in the subsequent differential expression analysis.
+<br/><br/>
+<img style="" class="preview" src="../assets/images/data_preprocessing/normalization_export.png"/>
+<br/><br/>
+The application also generates an interactive table that contains all of the normalized protein abundances for the selected method along with sample metadata.
 <br/><br/>
 <img style="" class="preview" src="../assets/images/data_preprocessing/normalization_footer.png"/>
 <br/><br/>
