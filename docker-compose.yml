@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   tidyproteomics-interactive:
-    image: ejmackrell/tidyproteomics-interactive:1.2.0
+    image: ejmackrell/tidyproteomics-interactive:1.2.1
     restart: unless-stopped
     ports:
       - "3838:3838"
