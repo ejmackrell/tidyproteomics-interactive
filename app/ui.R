@@ -19,7 +19,7 @@ ui <- dashboardPage(
       style="font-weight:400;font-size:1.25rem;margin-left:7px;margin-right:7px",
       "tidyproteomics-interactive"
     ),
-    span(class="left badge badge-secondary badge-pill",style="background: lightgrey; font-size: 0.75rem; font-weight: 400", "v1.2.0"),
+    span(class="left badge badge-secondary badge-pill",style="background: lightgrey; font-size: 0.75rem; font-weight: 400", "v1.2.1"),
     rightUi = shiny::tags$li(
       class = "dropdown",
       a(
