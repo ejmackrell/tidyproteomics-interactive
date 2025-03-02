@@ -31,7 +31,7 @@ source("modules/tab_introduction.R")
 options(
   spinner.size = 0.75,
   spinner.color = "#5e8cbe7a",
-  shiny.maxRequestSize = 500 * 1024^2,
+  shiny.maxRequestSize = 2000 * 1024^2,
   cli.progress_show_after = 0
 )
 

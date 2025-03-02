@@ -26,14 +26,14 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get clean
     
-# Copy application and lockfile
+# Copy environment; install renv, BiocManager, and required packages
 COPY renv.lock ./renv.lock
-COPY /app ./app
-
-# Install renv, BiocManager, and required packages
 RUN Rscript -e 'install.packages("renv")'
 RUN Rscript -e 'renv::install("BiocManager@1.30.19")'
 RUN Rscript -e 'options(timeout = 300); renv::restore()'
+
+# Copy application
+COPY /app ./app
 
 # Port metadata
 EXPOSE 3838
